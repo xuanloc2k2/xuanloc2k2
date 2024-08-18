@@ -1,0 +1,351 @@
+*{
+    margin:0;
+    padding :0;
+    font-family:'Poppins',sans-serif;
+    box-sizing:boder-box;
+    }
+    
+    body{
+    /* display:flex; */
+    gap:80px;
+    /* justify-content:center; */
+    /* align-items:center; */
+    /* min-height:100vh; */
+    background:black;
+    text-align:center;
+    font-family:'Poppins',sans-serif;
+    }
+
+    h1{
+        color : red;
+        margin-top:50px;
+        margin-bottom: 50px;
+        z-index: 999;
+        background-image: url(https://images.unsplash.com/photo-1723098232760-379e763a3f9b?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+        -webkit-background-clip: text;
+        background-clip:text;
+        color: transparent;
+        font-size: 60px;
+        text-shadow:    0px 0px 10px rgba(43, 255, 0, 0.603);
+        animation-name: chu;
+        animation-duration: 20s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+                        /* 10px -10px 10px red */
+    }
+    h1 span:nth-child(1){
+        animation-delay:1s;
+    }
+    h1 span:nth-child(2){
+        animation-delay:2s;
+    }
+    h1 span:nth-child(3){
+        animation-delay:3s;
+    }
+    h1 span:nth-child(4){
+        animation-delay:4s;
+    }
+    h1 span:nth-child(5){
+        animation-delay:5s;
+    }
+    h1 span:nth-child(6){
+        animation-delay:6s;
+    }
+    h1 span:nth-child(7){
+        animation-delay:7s;
+    }
+    h1 span:nth-child(8){
+        animation-delay:8s;
+        margin-left:30px;
+
+    }
+    h1 span:nth-child(9){
+        animation-delay:9s;
+    }
+    h1 span:nth-child(10){
+        animation-delay:10s;
+    }h1 span:nth-child(11){
+        animation-delay:11s;
+    }
+    h1 span:nth-child(12){
+        animation-delay:12s;
+    }
+
+    @keyframes chu{
+        0%{
+            color:red;
+            text-shadow: 0 0 20px red;
+        }
+        50%{
+            color:aqua;
+            text-shadow: 0 0 20px red;
+
+        }
+        60%{
+            color:#ff00e0;
+            text-shadow: 0 0 20px red;
+
+        }
+        75%{
+            color:#04fc43;
+            text-shadow: 0 0 20px red;
+        }
+    }
+
+    /* h1::after{
+        content:"";
+        background-color:#04fc43;
+        width: 100px;
+        height: 5px;
+        position:absolute;
+        bottom : 10px;
+
+    }  */
+   
+    
+    #clock{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    width:100 vw;
+    /* align-items:center; */
+    }
+
+    
+
+
+    #giay,
+    #phut,
+    #gio{
+    margin:10px;
+    margin-bottom: 30px;
+    width:200px;
+    height:100px;
+    border-radius:50%;
+    position: relative;
+    background-color:black;
+    text-align:center;
+    align-items: center;
+    justify-content: center;
+    inset: 0;
+    display: flex;
+    rotate: 90deg ;
+    font-size: 20px;
+    /*padding-top:50px;*/
+    }
+
+    #gio h2{
+    color:red;
+    -webkit-transform: rotate(-90deg);
+    }
+    #phut h2{
+    color:#f3df00;
+    -webkit-transform: rotate(-90deg);
+    }
+    #giay h2{
+    color:#04fc43;
+    -webkit-transform: rotate(-90deg);
+    }
+    
+    #giay:before,
+    #phut:before,
+    #gio:before{
+    content:'';
+    position: absolute;
+    border-radius:70%;
+    }
+    
+    #giay .dot{
+    position: absolute;
+    width:10px;
+    height:1px;
+    background: #04fc43;
+    transform-origin: 70px;
+    left:31px;
+    /* right:50px; */
+    /* bottom:60px; */
+
+    /* bottom :10px; */
+    }
+    
+    #giay .active.dot{
+    width:10px;
+    height: 1px;
+    background-color:#04fc43;
+    }
+    
+    #giay .active.dot~ .dot
+    {
+    background:black;
+    }
+    #gio .dot:nth-child(6n),
+    #phut .dot:nth-child(5n+5),
+    #giay .dot:nth-child(5n+5)
+    {
+    width:15px;
+    height:1px;
+    }
+    
+    #phut .dot{
+    position: absolute;
+    width:8px;
+    height:1px;
+    background: #fee800;
+    transform-origin: 70px;
+    left:31px;
+    }
+    
+    #phut .active.dot{
+    width:10px;
+    height: 1px;
+    background-color:#fee800;
+    }
+    
+    #phut .active.dot~ .dot
+    {
+    background:black;
+    }
+    
+    #gio .dot{
+    position: absolute;
+    width:8px;
+    height:1px;
+    background: red;
+    transform-origin: 70px;
+    left:31px;
+    }
+    
+    #gio .active.dot{
+    width:10px;
+    height: 1px;
+    background-color:red;
+    }
+    
+    #gio .active.dot~ .dot
+    {
+    background:black;
+    }
+
+    #ngay{
+        width:500px;
+        height:90px;
+        /* background-color: #04fc43; */
+        background:linear-gradient(135deg,#14ffe9,#ffeb3b,#ff00e0);
+        animation : a 5s linear infinite;
+        /* color:red; */
+        text-align: center;
+        margin:auto;
+        margin-bottom: 60px;
+        /* align-items:center; */
+        border: 50px;
+        border-radius:6px;
+        display:flex;
+        /* áp dụng cho 2 cái dưới */
+        place-items:center;
+        /* căn chỉnh giữa dọc */
+        justify-content: center;
+        /* căn chỉnh giữa ngang */
+        animation-direction:alternate;
+        
+    }
+
+
+
+    #dis{
+        width:400px;
+        height:70px;
+        background-color: black;
+        /* background:linear-gradient(135deg,#14ffe9,#ffeb3b,#ff00e0,red); */
+        animation : b 5s linear infinite;
+        /* color:red; */
+        text-align: center;
+        margin:auto;
+        /* align-items:center; */
+        border: 50px;
+        border-radius:6px;
+        display:flex;
+        /* áp dụng cho 2 cái dưới */
+        place-items:center;
+        /* căn chỉnh giữa dọc */
+        justify-content: center;
+        /* căn chỉnh giữa ngang */
+        
+    }
+
+    #day,
+    #mon,
+    #year{
+        display:inline-block;
+        /* right:10%; */
+        background-color:black;
+        width:100px;
+        height:50px;
+        display:flex;
+        /* áp dụng cho 2 cái dưới */
+        place-items:center;
+        /* căn chỉnh giữa dọc */
+        justify-content: center;
+        /* căn chỉnh giữa ngang */
+        letter-spacing: 5px;
+        background:linear-gradient(135deg,#14ffe9,#ffeb3b,#ff00e0);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        animation : a 2s linear infinite;
+        font-size:25px;
+        text-shadow: 0 0 0 50px red;
+        /* text-shadow: 0px 0px 10px #cc0000; */
+        font-weight: bold;
+        position:relative;
+        
+    }
+
+    
+@keyframes a{ 
+    100%{
+    filter:hue-rotate(360deg);
+    }};
+   
+
+    
+     img{
+        margin-top:50px;        
+    }
+
+    .anh{
+       animation-name:nhay;
+       animation-duration: 10s;
+       animation-timing-function: linear;
+       animation-iteration-count:infinite;
+
+    } 
+    
+    @keyframes nhay{
+       25%{
+        filter:drop-shadow(-200px 0px 50px rgb(255, 255, 255));
+       }
+       50%{
+        filter:drop-shadow(200px 0px 50px rgb(230, 64, 9));
+       }
+       75%{
+        filter:drop-shadow(0px 0px 0px rgb(19, 0, 233));
+       }
+       
+       0%{
+        filter:drop-shadow(0px 0px 0px rgb(255, 0, 0));
+       }
+       25%{
+        filter:drop-shadow(0px 0px 20px rgb(17, 255, 0));
+       }
+       50%{
+        filter:drop-shadow(0px 0px 0px rgb(0, 255, 217));
+       }
+        75%{
+        filter:drop-shadow(0px 0px 20px rgb(255, 255, 255));
+       }
+       100%{
+        filter:drop-shadow(0px 0px 0px rgb(0, 255, 76));
+       }
+    } 
+
+
+    
