@@ -1,1 +1,100 @@
+int tt[18]={33,47,49,61,60,59,53,41,39,24,22,10,4,3,2,14,16,30};
+int tt1[18]={30,33,16,47,14,49,2,61,3,60,4,59,10,53,22,41,24,39};
 
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+#define PIN        6
+#define NUMPIXELS 64
+int i=0;     
+int a=50; //delay
+int j;
+
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+void setup() {
+  Serial.begin(9600);
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+
+  pixels.begin();
+}
+
+void led1(int x ,int y ,int z){
+ i=0;
+ for(i;i<18;i++){
+  pixels.setPixelColor(tt[i], pixels.Color(x,y,z)); //R,G,B 
+  pixels.show();
+  delay(a);
+  }
+}
+
+
+void led2(int x , int y , int z){
+  i= 0;
+  for(i;i<18;i=i+2){
+  pixels.setPixelColor(tt1[i], pixels.Color(x,y,z)); //R,G,B 
+  pixels.setPixelColor(tt1[i+1], pixels.Color(x,y,z)); //R,G,B 
+  pixels.show();
+  delay(a);
+  }
+}      
+
+ void led3(int x , int y , int z , int q , int w , int e){
+  i= 0;
+  for(i;i<18;i=i+2){
+      pixels.setPixelColor(tt[i], pixels.Color(x,y,z)); //R,G,B 
+      pixels.show(); 
+      delay(a);
+      pixels.setPixelColor(tt[i+1], pixels.Color(q,w,e)); //R,G,B 
+      pixels.show();
+      delay(a);
+  }
+}  
+
+ void led4(int x , int y , int z , int q , int w , int e){
+  i = 0;
+  for(i;i<9;i++){
+      pixels.setPixelColor(tt[2*i], pixels.Color(x,y,z)); //R,G,B 
+      pixels.setPixelColor(tt[2*i+1], pixels.Color(q,w,e)); //R,G,B 
+  }
+      pixels.show();
+      delay(a+a+a);
+  i = 0;
+  for(i;i<9;i++){
+      pixels.setPixelColor(tt[2*i], pixels.Color(q,w,e)); //R,G,B 
+      pixels.setPixelColor(tt[2*i+1], pixels.Color(x,y,z));
+  }
+      pixels.show();
+      delay(a+a+a);
+}
+void loop() {
+    led2(0,255,255);
+    led2(0,255,0);
+    led2(255,0,0);
+    pixels.clear();
+    led1(255,0,0);
+    led1(0,255,255);
+    led1(255,255,0);
+    pixels.clear();
+    led3(255,0,0,0,255,0);
+    led3(255,255,0,0,255,255);
+    led3(255,0,0,0,255,0);
+    led3(255,255,0,0,255,255);
+    led3(255,0,0,0,255,0);
+    led3(255,255,0,0,255,255);
+    led3(255,0,0,0,255,0);
+    led3(255,255,0,0,255,255);
+    j=0;
+    for(j;j<10;j++){
+      led4(255,255,0,0,255,255);
+    }
+    i=0;
+    for(j;j<10;j++){
+      led4(0,255,0,255,0,255);
+    }
+}
+         
+  
+          
