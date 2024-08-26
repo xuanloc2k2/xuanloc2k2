@@ -1,0 +1,157 @@
+int led[6][20]={
+      0  , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10  , 11  , 12  , 13  , 14  , 15  , 16  , 17  , 18  , 19  ,
+      39  , 38  , 37  , 36  , 35  , 34  , 33  , 32  , 31  , 30  , 29  , 28  , 27  , 26  , 25  , 24  , 23  , 22  , 21  , 20  ,
+      40  , 41  , 42  , 43  , 44  , 45  , 46  , 47  , 48  , 49  , 50  , 51  , 52  , 53  , 54  , 55  , 56  , 57  , 58  , 59  ,
+      79  , 78  , 77  , 76  , 75  , 74  , 73  , 72  , 71  , 70  , 69  , 68  , 67  , 66  , 65  , 64  , 63  , 62  , 61  , 60  ,
+      80  , 81  , 82  , 83  , 84  , 85  , 86  , 87  , 88  , 89  , 90  , 91  , 92  , 93  , 94  , 95  , 96  , 97  , 98  , 99  ,
+      119 , 118 , 117 , 116 , 115 , 114 , 113 , 112 , 111 , 110 , 109 , 108 , 107 , 106 , 105 , 104 , 103 , 102 , 101 , 100 ,
+};
+
+int ttpp[8]={23,17,18,20,59,61,97,103};   
+int ttpt[8]={24,14,13,27,52,66,94,104};      
+int tttp[8]={35,5,6,32,47,73,85,115};
+int tttt[8]={36,2,1,39,40,78,82,116};
+
+int mau[]={0,100,255};
+
+int mau2[][6] = { 
+     1,1,1,1,1,0,  0,0,0,0,0,1,  0,0,1,1,1,0,  0,0,0,0,0,1,  1,1,1,1,1,0,  0,0,0,0,0,0,  1,1,1,1,1,1,
+     1,0,1,0,0,1,  1,0,1,0,0,1,  1,0,0,0,0,1,  0,0,0,0,0,0,  1,1,1,1,1,1,  0,0,0,0,0,1,  0,0,0,0,0,1,
+     0,0,0,0,0,1,  0,0,0,0,0,0,  1,1,1,1,1,1,  1,0,0,0,0,1,  1,0,0,0,0,1,  0,0,0,0,0,0,  1,1,1,1,1,1, 
+     1,0,0,0,0,1,  1,0,0,0,0,1,  1,1,1,1,1,1,  0,0,0,0,0,0,  1,1,1,1,1,1,  0,1,0,0,0,0,  0,0,1,0,0,0,
+     0,1,0,0,0,0,  1,1,1,1,1,1,  0,0,0,0,0,0,  1,1,1,1,1,1,  1,0,1,0,0,1,  1,0,1,0,0,1,  1,0,0,0,0,1,
+     0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0, 
+};
+
+
+byte nho[6][20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+int color = 0;
+int x=0;
+int y=0;
+int o=0;
+int lap=0;
+int h;
+int k;
+int q;
+int i; // biến chạy hiệu ứng lẻ
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+#define PIN        6
+#define NUMPIXELS 120    
+int a=50; //delay
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  Serial.begin(9600);
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+  
+  pixels.begin();
+}
+void quet(int a , int b , int c){
+ pixels.clear();
+     for(y=0;y<19;y++){
+      for(x=0;x<6;x++){
+          nho[x][y]=nho[x][y+1];
+      }
+     }
+    
+      for(x=0;x<7;x++){
+        nho[x][19]=mau2[o][x];
+      }
+
+     for(y=0;y<20;y++){
+ 
+      for(x=0;x<6;x++){
+        if(nho[x][y]==1){
+            pixels.setPixelColor(led[x][y],pixels.Color(a,b,c)); //R,G,B 
+                  
+        }
+        else{
+            pixels.setPixelColor(led[x][y],pixels.Color(0,0,0)); //R,G,B    
+        }
+      }      
+   }
+    
+      pixels.show();
+      delay(100);  
+      if(o==41)
+        {
+          o=0;
+        }
+      else{
+          o=o+1;  
+        }
+}
+void tt2ben(){
+   for(lap=0;lap<10;lap++){
+     lay_mau();  
+     for(i=0;i<8;i++){
+       pixels.setPixelColor(ttpp[i],pixels.Color(mau[h],mau[q],mau[k])); //R,G,B    
+       pixels.setPixelColor(ttpt[i] ,pixels.Color(mau[h],mau[q],mau[k])); //R,G,B    
+       pixels.setPixelColor(tttp[i],pixels.Color(mau[h],mau[q],mau[k])); //R,G,B    
+       pixels.setPixelColor(tttt[i],pixels.Color(mau[h],mau[q],mau[k])); //R,G,B          
+       pixels.show();
+       delay(100);
+     }        
+   }
+}
+
+void led_random(){
+       lay_mau();
+       x = random(6);
+       y = random(20);
+       pixels.setPixelColor(led[x][y],pixels.Color(mau[h],mau[q],mau[k])); //R,G,B
+       pixels.show();
+       delay(100);    
+}
+void lay_mau(){
+      h = random(3);
+      q = random(3);
+      k = random(3);   
+}
+void nua_tt(){
+     lay_mau();  
+     for(i=0;i<8;i++){
+       pixels.setPixelColor(ttpp[i],pixels.Color(255,q,k)); //R,G,B    
+       pixels.setPixelColor(tttp[i],pixels.Color(255,q,k)); //R,G,B         
+       pixels.show();
+       delay(100);
+     } 
+     for(i=0;i<8;i++){
+       pixels.setPixelColor(ttpt[i],pixels.Color(h,q,k)); //R,G,B    
+       pixels.setPixelColor(tttt[i],pixels.Color(h,q,k)); //R,G,B         
+       pixels.show();
+       delay(100);
+     }      
+}
+void loop() {
+  for(lap=0;lap<10;lap++){
+    quet(255,255,0);
+    quet(255,0,255);
+    quet(0,255,255);
+    quet(0,255,0);
+    quet(255,0,0);
+    quet(0,0,255);
+  }
+
+  pixels.clear();
+  tt2ben();
+
+    pixels.clear();   
+    for(lap=0;lap<1000;lap++){ 
+    led_random();
+  }
+}
+  
+
+          
