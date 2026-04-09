@@ -1,0 +1,138 @@
+#include <Arduino.h>
+int matrix[2][32]= {
+  {7,6,5,4,3,2,1,0,23,22,21,20,19,18,17,16,39,38,37,36,35,34,33,32,55,54,53,52,51,50,49,48},
+  {8,9,10,11,12,13,14,15,24,25,26,27,28,29,30,31,40,41,42,43,44,45,46,47,56,57,58,59,60,61,62,63}
+};
+
+#define A_PIN D5
+#define B_PIN D4
+#define R1_PIN D13
+#define G1_PIN D11
+#define B1_PIN D12
+#define R2_PIN D10
+#define G2_PIN D8
+#define B2_PIN D7
+
+#define CLK_PIN D11
+#define LAT_PIN d3
+#define OE_PIN d1
+
+#define ROWS 16
+#define COLS 4   // 4 byte = 32 cột
+
+// Mỗi màu 1 ma trận riêng
+byte R[ROWS][COLS] = {
+  {0, 0, 0, 0}, // 0
+  {198, 60, 0, 0}, // 1
+  {198, 126, 0, 0}, // 2
+  {198, 198, 0, 0}, // 3
+  {198, 198, 0, 0}, // 4
+  {254, 198, 0, 0}, // 5
+  {254, 254, 0, 0}, // 6
+  {198, 254, 0, 0}, // 7
+  {198, 198, 0, 0}, // 8
+  {198, 198, 0, 0}, // 9
+  {198, 198, 0, 0}, // 10
+  {198, 198, 0, 0}, // 11
+  {0, 0, 0, 0}, // 12
+  {0, 0, 0, 0}, // 13
+  {0, 0, 0, 0}, // 14
+  {0, 0, 0, 0}  // 15
+};
+byte G[ROWS][COLS];  // xanh lá (để trống → tắt)
+byte B[ROWS][COLS];  // xanh dương (để trống → tắt)
+
+int quetled = 64;
+int x,y,byteindex,bitindex,row;
+
+//------------------- SET MÀU -------------------
+void setPixel(int i, int row) {
+  // Tắt hết LED trước
+  digitalWrite(R1_PIN, LOW); digitalWrite(G1_PIN, LOW); digitalWrite(B1_PIN, LOW);
+  digitalWrite(R2_PIN, LOW); digitalWrite(G2_PIN, LOW); digitalWrite(B2_PIN, LOW);
+
+  // Tìm vị trí x,y từ mapping
+  for (int r = 0; r < 2; r++) {
+    for (int c = 0; c < 32; c++) {
+      if (matrix[r][c] == i) { x = r; y = c; goto found; }
+    }
+  }
+  return; // không tìm thấy
+found:
+
+  byteindex = y / 8;
+  bitindex  = y % 8;
+
+  // Bảng ánh xạ row → vị trí trong ma trận
+  const byte mapR1[4][2] = { {0,4}, {1,5}, {2,6}, {3,7} };
+  const byte mapR2[4][2] = { {8,12}, {9,13}, {10,14}, {11,15} };
+
+  byte idx1 = (x == 0) ? mapR1[row][0] : mapR1[row][1];
+  byte idx2 = (x == 0) ? mapR2[row][0] : mapR2[row][1];
+
+  // đọc bit trong từng ma trận
+  bool r1 = bitRead(R[idx1][byteindex], 7 - bitindex);
+  bool g1 = bitRead(G[idx1][byteindex], 7 - bitindex);
+  bool b1 = bitRead(B[idx1][byteindex], 7 - bitindex);
+
+  bool r2 = bitRead(R[idx2][byteindex], 7 - bitindex);
+  bool g2 = bitRead(G[idx2][byteindex], 7 - bitindex);
+  bool b2 = bitRead(B[idx2][byteindex], 7 - bitindex);
+
+  // bật LED theo từng màu
+  if (r1) digitalWrite(R1_PIN, HIGH);
+  if (g1) digitalWrite(G1_PIN, HIGH);
+  if (b1) digitalWrite(B1_PIN, HIGH);
+
+  if (r2) digitalWrite(R2_PIN, HIGH);
+  if (g2) digitalWrite(G2_PIN, HIGH);
+  if (b2) digitalWrite(B2_PIN, HIGH);
+}
+
+//------------------- QUÉT HÀNG -------------------
+void scanDisplay() {
+  for (row = 0; row < 4; row++) {
+    digitalWrite(OE_PIN, HIGH);   // tắt LED khi nạp dữ liệu
+
+    for (int i = 0; i < quetled; i++) {
+      setPixel(i, row);
+      digitalWrite(CLK_PIN, HIGH);
+      digitalWrite(CLK_PIN, LOW);
+    }
+
+    // chọn hàng
+    digitalWrite(A_PIN, row & 0x01);
+    digitalWrite(B_PIN, (row >> 1) & 0x01);
+
+    digitalWrite(LAT_PIN, HIGH);
+    digitalWrite(LAT_PIN, LOW);
+
+    digitalWrite(OE_PIN, LOW);   // bật LED hiển thị
+  }
+}
+
+//------------------- SETUP -------------------
+void setup() {
+  pinMode(A_PIN, OUTPUT);
+  pinMode(B_PIN, OUTPUT);
+  pinMode(C_PIN, OUTPUT);
+
+  pinMode(R1_PIN, OUTPUT);
+  pinMode(G1_PIN, OUTPUT);
+  pinMode(B1_PIN, OUTPUT);
+  pinMode(R2_PIN, OUTPUT);
+  pinMode(G2_PIN, OUTPUT);
+  pinMode(B2_PIN, OUTPUT);
+
+  pinMode(CLK_PIN, OUTPUT);
+  pinMode(LAT_PIN, OUTPUT);
+  pinMode(OE_PIN, OUTPUT);
+
+  digitalWrite(OE_PIN, LOW);
+  digitalWrite(C_PIN, LOW);
+}
+
+//------------------- LOOP -------------------
+void loop() {
+  scanDisplay();  // luôn quét hiển thị
+}
