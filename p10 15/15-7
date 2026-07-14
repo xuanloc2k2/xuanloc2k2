@@ -1,0 +1,1309 @@
+#include <Arduino.h>
+#include "WiFi.h"
+#include "ESPAsyncWebServer.h"
+#include "SPIFFS.h"
+
+#include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#include <WiFiUdp.h>
+#include "time.h"
+
+WiFiUDP udp;
+
+#define DDP_PORT 4048
+uint8_t ddpBuffer[1500];
+
+// Replace with your network credentials
+char ssid[] = "PhuongLien";
+char pass[] = "LyLy97ok";
+
+// IP tĩnh
+IPAddress local_IP(192, 168, 1, 9);
+IPAddress gateway(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
+IPAddress primaryDNS(8, 8, 8, 8);
+IPAddress secondaryDNS(8, 8, 4, 4);
+
+uint8_t number1[10][5] = {
+    {0x7E, 0x81, 0x81, 0x81, 0x7E}, // 0
+    {0x00, 0x82, 0xFF, 0x80, 0x00}, // 1
+    {0xE2, 0x91, 0x91, 0x91, 0x8E}, // 2
+    {0x42, 0x81, 0x89, 0x89, 0x76}, // 3
+    {0x1C, 0x12, 0x11, 0xFF, 0x10}, // 4
+    {0x4F, 0x89, 0x89, 0x89, 0x71}, // 5
+    {0x7E, 0x89, 0x89, 0x89, 0x72}, // 6
+    {0x01, 0x01, 0xF1, 0x09, 0x07}, // 7
+    {0x76, 0x89, 0x89, 0x89, 0x76}, // 8
+    {0x4E, 0x91, 0x91, 0x91, 0x7E}  // 9
+
+};
+
+const uint8_t number2[10][5] = {
+
+    {0x7E, 0x81, 0x81, 0x81, 0x7E},  // 0
+    {0x00, 0x82, 0xFF, 0x80, 0x00},  // 1
+    {0xE2, 0x91, 0x91, 0x91, 0x8E},  // 2
+    {0x42, 0x81, 0x89, 0x89, 0x76},  // 3
+    {0x1C, 0x12, 0x11, 0xFF, 0x10},  // 4
+    {0x4F, 0x89, 0x89, 0x89, 0x71},  // 5
+    {0x7E, 0x89, 0x89, 0x89, 0x72},  // 6
+    {0x01, 0x01, 0xF1, 0x09, 0x07},  // 7
+    {0x76, 0x89, 0x89, 0x89, 0x76},  // 8
+    {0x4E, 0x91, 0x91, 0x91, 0x7E}   // 9
+
+};
+
+
+#define PANEL_RES_X 64      // Number of pixels wide of eac
+
+#define PANEL_RES_Y 8   // Number of pixels tall of each INDIVIDUAL panel module.
+#define PANEL_CHAIN 2      // Total number of panels chained one to another
+
+uint8_t speed = 20;
+AsyncWebServer server(80);
+int matrix[2][64] = {
+{
+7,6,5,4,3,2,1,0,23,22,21,20,19,18,17,16,
+39,38,37,36,35,34,33,32,55,54,53,52,51,50,49,48,
+71,70,69,68,67,66,65,64,87,86,85,84,83,82,81,80,
+103,102,101,100,99,98,97,96,119,118,117,116,115,114,113,112
+},
+
+// hàng 4,5,6,7
+{
+8,9,10,11,12,13,14,15,24,25,26,27,28,29,30,31,
+40,41,42,43,44,45,46,47,56,57,58,59,60,61,62,63,
+72,73,74,75,76,77,78,79,88,89,90,91,92,93,94,95,
+104,105,106,107,108,109,110,111,120,121,122,123,124,125,126,127
+}
+};
+
+
+
+uint8_t truc_x = 0;
+uint8_t truc_y = 0;
+uint8_t color_r = 0;
+uint8_t color_g = 0;  
+uint8_t color_b = 0;
+int mode = 0;
+uint8_t bright = 20; // Brightness level (0-255)
+
+
+
+//MatrixPanel_I2S_DMA dma_display;
+MatrixPanel_I2S_DMA *dma_display = nullptr;
+#define R1_PIN   25
+#define G1_PIN   26
+#define B1_PIN   27
+
+#define R2_PIN   14
+#define G2_PIN   12
+#define B2_PIN   13
+
+#define A_PIN    23
+#define B_PIN    19
+
+#define CLK_PIN  16
+#define LAT_PIN  4
+#define OE_PIN   15
+
+
+
+uint16_t myBLACK, myWHITE, myRED, myGREEN, myBLUE;
+
+uint16_t colorWheel(uint8_t pos) {
+  if(pos < 85) {
+    return dma_display->color565(pos * 3, 255 - pos * 3, 0);
+  } else if(pos < 170) {
+    pos -= 85;
+    return dma_display->color565(255 - pos * 3, 0, pos * 3);
+  } else {
+    pos -= 170;
+    return dma_display->color565(0, pos * 3, 255 - pos * 3);
+  }
+}
+
+
+void pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b)
+{
+
+    
+   int yy = y % 4;
+        if (y >= 8)
+        yy += 4;
+
+    int xx = matrix[(y >> 2) & 1][x];
+    dma_display->drawPixel(xx, yy, dma_display->color565(r,g,b));
+}
+
+void drawText(int colorWheelOffset)
+{
+  
+  // draw text with a rotating colour
+  dma_display->setTextSize(1);     // size 1 == 8 pixels high
+  dma_display->setTextWrap(false); // Don't wrap at end of line - will do ourselves
+
+  dma_display->setCursor(5, 0);    // start at top left, with 8 pixel of spacing
+  uint8_t w = 0;
+  const char *str = "ESP32 DMA";
+  for (w=0; w<strlen(str); w++) {
+    dma_display->setTextColor(colorWheel((w*32)+colorWheelOffset));
+    dma_display->print(str[w]);
+  }
+
+  dma_display->println();
+  dma_display->print(" ");
+  for (w=9; w<18; w++) {
+    dma_display->setTextColor(colorWheel((w*32)+colorWheelOffset));
+    dma_display->print("*");
+  }
+  
+  dma_display->println();
+
+  dma_display->setTextColor(dma_display->color444(15,15,15));
+  dma_display->println("LED MATRIX!");
+
+  // print each letter with a fixed rainbow color
+  dma_display->setTextColor(dma_display->color444(0,8,15));
+  dma_display->print('3');
+  dma_display->setTextColor(dma_display->color444(15,4,0));
+  dma_display->print('2');
+  dma_display->setTextColor(dma_display->color444(15,15,0));
+  dma_display->print('x');
+  dma_display->setTextColor(dma_display->color444(8,15,0));
+  dma_display->print('6');
+  dma_display->setTextColor(dma_display->color444(8,0,15));
+  dma_display->print('4');
+
+  // Jump a half character
+  dma_display->setCursor(34, 24);
+  dma_display->setTextColor(dma_display->color444(0,15,15));
+  dma_display->print("*");
+  dma_display->setTextColor(dma_display->color444(15,0,0));
+  dma_display->print('R');
+  dma_display->setTextColor(dma_display->color444(0,15,0));
+  dma_display->print('G');
+  dma_display->setTextColor(dma_display->color444(0,0,15));
+  dma_display->print("B");
+  dma_display->setTextColor(dma_display->color444(15,0,8));
+  dma_display->println("*");
+
+}
+
+String processor(const String &var)
+{
+    if (var == "VAR1") return String(truc_x);
+    if (var == "VAR2") return String(truc_y);
+    if (var == "VAR3") return String(color_r);
+    if (var == "VAR4") return String(color_g);
+    if (var == "VAR5") return String(color_b);
+    if (var == "VAR6") return String(mode);
+    if (var == "VAR7") return String(speed);
+    if (var == "VAR8") return String(bright);
+
+    return String();
+}
+/*
+void receiveDDP()
+{
+    int len = udp.parsePacket();
+
+    if(len <= 10)
+        return;
+
+    if(len > sizeof(ddpBuffer))
+        len = sizeof(ddpBuffer);
+
+    udp.read(ddpBuffer, len);
+
+    // Kiểm tra phiên bản DDP
+    if((ddpBuffer[0] & 0x3C) != 0x00)
+        return;
+
+    // Offset dữ liệu (byte)
+    uint32_t byteOffset =
+        ((uint32_t)ddpBuffer[4] << 24) |
+        ((uint32_t)ddpBuffer[5] << 16) |
+        ((uint32_t)ddpBuffer[6] << 8 ) |
+        ((uint32_t)ddpBuffer[7]);
+
+    // Bắt đầu LED nào
+    uint32_t led = byteOffset / 3;
+
+    // Độ dài payload
+    uint16_t payloadLength =
+        ((uint16_t)ddpBuffer[8] << 8) |
+        ddpBuffer[9];
+
+    if(payloadLength > len - 10)
+        payloadLength = len - 10;
+
+    int p = 10;
+
+    while(payloadLength >= 3)
+    {
+        if(led >= 1024)
+            break;
+
+        pixel(
+            mapX[led],
+            mapY[led],
+            ddpBuffer[p],
+            ddpBuffer[p+1],
+            ddpBuffer[p+2]
+        );
+
+        led++;
+        p += 3;
+        payloadLength -= 3;
+    }
+}
+*/
+
+// NTP
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 7 * 3600;   // UTC+7
+const int   daylightOffset_sec = 0;
+
+// Biến thời gian
+struct tm timeinfo;
+uint8_t hour_i = 0;
+uint8_t minute_i = 0;
+
+
+void setup() {
+
+  Serial.begin(9600);
+   // Mount SPIFFS
+
+
+
+    if (!SPIFFS.begin(true))
+    {
+        Serial.println("SPIFFS Mount Failed");
+        return;
+    }
+
+    // Kết nối WiFi
+    WiFi.begin(ssid, pass);
+
+    Serial.print("Connecting");
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+
+    udp.begin(DDP_PORT);
+    Serial.println("DDP Ready");
+    Serial.println();
+    Serial.print("Connected!");
+    Serial.print(" IP: ");
+    Serial.println(WiFi.localIP());
+
+        // Trang chủ
+        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+        {
+            request->send(SPIFFS, "/index.html", String(), false, processor);
+        });
+
+        // CSS
+        server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
+        {
+            request->send(SPIFFS, "/style.css", "text/css");
+        });
+
+    // Nhận 6 biến
+        server.on("/set", HTTP_GET, [](AsyncWebServerRequest *request)
+        {
+            if (request->hasParam("v1"))
+                truc_x = request->getParam("v1")->value().toInt();
+
+            if (request->hasParam("v2"))
+                truc_y = request->getParam("v2")->value().toInt();
+
+            if (request->hasParam("v3"))
+                color_r = request->getParam("v3")->value().toInt();
+
+            if (request->hasParam("v4"))
+                color_g = request->getParam("v4")->value().toInt();
+
+            if (request->hasParam("v5"))
+                color_b = request->getParam("v5")->value().toInt();
+
+            if (request->hasParam("v6"))
+                mode = request->getParam("v6")->value().toInt();
+            
+            if (request->hasParam("v7"))
+                speed = request->getParam("v7")->value().toInt();
+            if (request->hasParam("v8"))
+                bright = request->getParam("v8")->value().toInt();
+                dma_display->setBrightness8(bright); //0-255
+            request->send(200, "text/plain", "OK");
+   });
+   server.begin();
+  
+  // Module configuration
+  HUB75_I2S_CFG mxconfig(
+    PANEL_RES_X,   // module width
+    PANEL_RES_Y,   // module hei+ght
+    PANEL_CHAIN    // Chain length
+
+  );
+
+    mxconfig.min_refresh_rate = 120;
+  //mxconfig.gpio.e = 18;
+  //mxconfig.clkphase = false;
+  //mxconfig.driver = HUB75_I2S_CFG::FM6126A;
+  
+  // Display Setup
+  dma_display = new MatrixPanel_I2S_DMA(mxconfig);
+  dma_display->setBrightness8(20); //0-255
+  dma_display->clearScreen();
+
+  myBLACK = dma_display->color565(0, 0, 0);
+  myWHITE = dma_display->color565(255, 255, 255);
+  myRED = dma_display->color565(255, 0, 0);
+  myGREEN = dma_display->color565(0, 255, 0);
+  myBLUE = dma_display->color565(0, 0, 255);
+  
+
+
+
+
+  dma_display->clearScreen();
+  delay(500);
+  //drawText(0);
+  dma_display->begin();
+  dma_display->setBrightness8(bright); //0-255
+
+  // ================= GPIO =================
+
+
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+}
+
+uint16_t rainbow(uint8_t pos)
+{
+    pos = 255 - pos;
+
+    if (pos < 85)
+        return dma_display->color565(255 - pos * 3, 0, pos * 3);
+
+    if (pos < 170)
+    {
+        pos -= 85;
+        return dma_display->color565(0, pos * 3, 255 - pos * 3);
+    }
+
+    pos -= 170;
+    return dma_display->color565(pos * 3, 255 - pos * 3, 0);
+}
+
+void pixel565(int x,int y,uint16_t c)
+{
+    int yy = y % 4;
+    if(y>=8) yy+=4;
+
+    int xx = matrix[(y>>2)&1][x];
+
+    dma_display->drawPixel(xx,yy,c);
+}
+
+
+void drawNumber(uint8_t x, uint8_t y, uint8_t num, uint8_t r, uint8_t g, uint8_t bl)             // vẽ số theo màu biến
+{
+    for (uint8_t a = 0; a < 5; a++)
+    {
+        for (uint8_t b = 0; b < 8; b++)
+        {
+            if (number2[num][a] & (1 << b))
+                pixel(x + a, y + b,r,g,bl);
+        }
+    }
+}
+
+uint8_t shift = 0;
+
+void gradientColor(uint8_t x, uint8_t &r, uint8_t &g, uint8_t &b)
+{
+    
+
+    uint8_t p = (x * 8 + shift) & 0xFF;
+
+    if (p < 85)
+    {
+        r = 255 - p * 3;
+        g = p * 3;
+        b = 30;
+    }
+    else if (p < 170)
+    {
+        p -= 85;
+        r = 30;
+        g = 255 - p * 3;
+        b = p * 3;
+    }
+    else
+    {
+        p -= 170;
+        r = p * 3;
+        g = 30;
+        b = 255 - p * 3;
+    }
+}
+ // case 202
+
+uint8_t gradientOffset = 0;
+
+void colorWheel(uint8_t pos, uint8_t &r, uint8_t &g, uint8_t &b)
+{
+    pos &= 0xFF;
+
+    if (pos < 85)
+    {
+        r = 255 - pos * 3;
+        g = pos * 3;
+        b = 0;
+    }
+    else if (pos < 170)
+    {
+        pos -= 85;
+        r = 0;
+        g = 255 - pos * 3;
+        b = pos * 3;
+    }
+    else
+    {
+        pos -= 170;
+        r = pos * 3;
+        g = 0;
+        b = 255 - pos * 3;
+    }
+}
+
+void drawNumber2(uint8_t x, uint8_t y, uint8_t num)                                             // vẽ số theo gradient
+{
+    for (uint8_t i = 0; i < 5; i++)
+    {
+        uint8_t r,g,b;
+        colorWheel((x+i)*8 + gradientOffset, r, g, b);
+
+        for (uint8_t j = 0; j < 8; j++)
+        {
+            if (number2[num][i] & (1 << (7-j)))
+                pixel(x+i, y+j, r, g, b);
+        }
+    }
+}
+
+
+void loop() {
+
+  switch(mode)
+  {
+    case 0:
+        for(int i=0; i<64; i++){pixel(i, 0, 255, 0, 0);}
+        mode = 100;
+      break;
+
+    case 1:
+      dma_display->clearScreen();
+      mode = 100;
+      break;
+    case 2:
+      pixel(truc_x, truc_y, color_r, color_g, color_b);
+      break;
+
+    // Hàng ngang
+   
+    // Khung màn hình
+    case 7:
+        dma_display->clearScreen();
+
+        for(int x=0;x<64;x++)
+        {
+            pixel(x,0,color_r,color_g,color_b);
+            pixel(x,15,color_r,color_g,color_b);
+        }
+
+        for(int y=0;y<16;y++)
+        {
+            pixel(0,y,color_r,color_g,color_b);
+            pixel(63,y,color_r,color_g,color_b);
+        }
+
+        mode=100;
+        break;
+
+    // Tô kín màn hình
+    case 8:
+        dma_display->clearScreen();
+
+        for(int y=0;y<16;y++)
+        {
+            for(int x=0;x<64;x++)
+            {
+                pixel(x,y,color_r,color_g,color_b);
+            }
+        }
+
+        mode=100;
+        break;
+
+    // Ngẫu nhiên 100 điểm
+    case 9:
+        dma_display->clearScreen();
+
+        for(int i=0;i<100;i++)
+        {
+            pixel(random(64),
+                  random(16),
+                  random(256),
+                  random(256),
+                  random(256));
+        }
+
+        mode=100;
+        break;
+
+    // Kim cương lớn
+    case 17:
+        dma_display->clearScreen();
+        for(int i=0;i<8;i++)
+        {
+            pixel(32+i,8-i,color_r,color_g,color_b);
+            pixel(32-i,8-i,color_r,color_g,color_b);
+            pixel(32+i,8+i,color_r,color_g,color_b);
+            pixel(32-i,8+i,color_r,color_g,color_b);
+        }
+        mode=100;
+        break;
+
+    // Caro
+    case 18:
+        dma_display->clearScreen();
+        for(int y=0;y<16;y++)
+        {
+            for(int x=0;x<64;x++)
+            {
+                if((x+y)&1)
+                    pixel(x,y,color_r,color_g,color_b);
+            }
+        }
+        mode=100;
+        break;
+
+    // Viền caro
+    case 19:
+        dma_display->clearScreen();
+        for(int y=0;y<16;y++)
+        {
+            for(int x=0;x<64;x++)
+            {
+                if(x%4==0 || y%4==0)
+                    pixel(x,y,color_r,color_g,color_b);
+            }
+        }
+        mode=100;
+        break;
+
+    // Hình dấu +
+    case 20:
+        dma_display->clearScreen();
+        for(int x=0;x<64;x++)
+            pixel(x,8,color_r,color_g,color_b);
+
+        for(int y=0;y<16;y++)
+            pixel(32,y,color_r,color_g,color_b);
+
+        mode=100;
+        break;
+
+    // Nở hình vuông
+    case 21:
+        dma_display->clearScreen();
+        for(int r=1;r<8;r++)
+        {
+            for(int x=32-r;x<=32+r;x++)
+            {
+                pixel(x,8-r,color_r,color_g,color_b);
+                pixel(x,8+r,color_r,color_g,color_b);
+            }
+
+            for(int y=8-r;y<=8+r;y++)
+            {
+                pixel(32-r,y,color_r,color_g,color_b);
+                pixel(32+r,y,color_r,color_g,color_b);
+            }
+        }
+        mode=100;
+        break;
+
+    // Lưới
+    case 22:
+        dma_display->clearScreen();
+        for(int x=0;x<64;x+=4)
+            for(int y=0;y<16;y++)
+                pixel(x,y,color_r,color_g,color_b);
+
+        for(int y=0;y<16;y+=4)
+            for(int x=0;x<64;x++)
+                pixel(x,y,color_r,color_g,color_b);
+
+        mode=100;
+        break;
+
+    // Pixel ngẫu nhiên toàn màn hình
+    case 23:
+        dma_display->clearScreen();
+        for(int i=0;i<300;i++)
+        {
+            pixel(random(64),
+                  random(16),
+                  color_r,
+                  color_g,
+                  color_b);
+        }
+        mode=100;
+        break;
+
+    // Hai đường chéo
+    case 24:
+        dma_display->clearScreen();
+        for(int i=0;i<16;i++)
+        {
+            pixel(i*4,i,color_r,color_g,color_b);
+            pixel(63-i*4,i,color_r,color_g,color_b);
+        }
+        mode=100;
+        break;
+
+    // Hình sao
+    case 25:
+        dma_display->clearScreen();
+
+        for(int x=0;x<64;x++)
+            pixel(x,8,color_r,color_g,color_b);
+
+        for(int y=0;y<16;y++)
+            pixel(32,y,color_r,color_g,color_b);
+
+        for(int i=0;i<16;i++)
+        {
+            pixel(i*4,i,color_r,color_g,color_b);
+            pixel(63-i*4,i,color_r,color_g,color_b);
+        }
+
+        mode=100;
+        break;
+
+    case 55:
+      {
+          static int t=0;
+
+          for(int y=0;y<16;y++)
+          {
+              for(int x=0;x<64;x++)
+              {
+                  uint8_t v=
+                      128+
+                      64*sin((x+t)*0.15)+
+                      64*sin((y+t)*0.35);
+
+                  pixel565(x,y,rainbow(v));
+              }
+          }
+
+          t++;
+
+          delay(speed);
+      }
+  break;
+
+          case 56:
+    {
+        static int t=0;
+
+        dma_display->clearScreen();
+
+        for(int x=0;x<64;x++)
+        {
+            int y=8+5*sin((x+t)*0.2);
+
+            pixel565(x,y,rainbow(x*3+t));
+        }
+
+        t++;
+
+        delay(speed);
+    }
+    break;
+
+case 57:
+{
+    static int r=0;
+
+    dma_display->clearScreen();
+
+    for(float a=0;a<6.28;a+=0.2)
+    {
+        int x=32+r*cos(a);
+        int y=8+r*sin(a);
+
+        pixel565(x,y,rainbow(a*50+r*20));
+    }
+
+    r++;
+
+    if(r>10)
+        r=0;
+
+    delay(speed);
+}
+break;
+
+case 58:
+{
+    static int x=0;
+
+    dma_display->clearScreen();
+
+    for(int i=0;i<10;i++)
+    {
+        pixel565((x-i+64)%64,8,rainbow(i*20));
+    }
+
+    x++;
+
+    if(x>=64)
+        x=0;
+
+    delay(speed);
+}
+break;
+
+case 59:
+{
+    static float a=0;
+
+    dma_display->clearScreen();
+
+    for(float r=0;r<10;r+=0.2)
+    {
+        int x=32+r*cos(a+r);
+        int y=8+r*sin(a+r);
+
+        pixel565(x,y,rainbow(r*20));
+    }
+
+    a+=0.1;
+
+    delay(speed);
+}
+break;
+
+case 60:
+{
+    static uint8_t t=0;
+
+    for(int y=0;y<16;y++)
+        for(int x=0;x<64;x++)
+            pixel565(x,y,rainbow(x*3+y*8+t));
+
+    t+=2;
+    delay(speed);
+}
+break;
+
+case 61:
+{
+    static uint8_t t=0;
+
+    for(int y=0;y<16;y++)
+        for(int x=0;x<64;x++)
+            pixel565(x,y,rainbow(y*16+t));
+
+    t++;
+    delay(speed);
+}
+break;
+
+case 62:
+{
+    static int x=0;
+
+    dma_display->clearScreen();
+
+    for(int i=0;i<12;i++)
+    {
+        pixel565((x-i+64)%64,8,rainbow(i*20));
+    }
+
+    x++;
+    if(x>=64)x=0;
+
+    delay(speed);
+}
+break;
+
+case 63:
+{
+    static int y[64];
+    static bool init=false;
+
+    if(!init)
+    {
+        for(int i=0;i<64;i++)
+            y[i]=random(16);
+        init=true;
+    }
+
+    dma_display->clearScreen();
+
+    for(int x=0;x<64;x++)
+    {
+        pixel565(x,y[x],rainbow(x*4+y[x]*10));
+        y[x]++;
+        if(y[x]>=16)y[x]=0;
+    }
+
+    delay(speed);
+}
+break;
+
+case 64:
+{
+    dma_display->clearScreen();
+
+    for(int i=0;i<80;i++)
+        pixel565(random(64),random(16),rainbow(random(255)));
+
+    delay(speed);
+}
+break;
+
+case 65:
+{
+    static int t=0;
+
+    for(int y=0;y<16;y++)
+    {
+        for(int x=0;x<64;x++)
+        {
+            uint8_t v=
+            128+
+            64*sin((x+t)*0.18)+
+            64*cos((y+t)*0.22);
+
+            pixel565(x,y,rainbow(v));
+        }
+    }
+
+    t++;
+
+    delay(speed);
+}
+break;
+
+case 66:
+{
+    static int t=0;
+
+    dma_display->clearScreen();
+
+    for(float a=0;a<6.28;a+=0.15)
+    {
+        int r=abs(6*sin((t+a)*0.1));
+
+        int x=32+r*cos(a);
+        int y=8+r*sin(a);
+
+        pixel565(x,y,rainbow(a*40+t));
+    }
+
+    t++;
+
+    delay(speed);
+}
+break;
+
+case 67:
+{
+    static int x=0;
+
+    dma_display->clearScreen();
+
+    for(int y=0;y<16;y++)
+        pixel565(x,y,rainbow(y*20));
+
+    x++;
+    if(x>=64)x=0;
+
+    delay(speed);
+}
+break;
+
+case 68:
+{
+    static int t=0;
+
+    dma_display->clearScreen();
+
+    for(int x=0;x<64;x++)
+    {
+        int y1=8+4*sin((x+t)*0.2);
+        int y2=8-4*sin((x+t)*0.2);
+
+        pixel565(x,y1,rainbow(x*4+t));
+        pixel565(x,y2,rainbow(x*4+t+100));
+    }
+
+    t++;
+    delay(speed);
+}
+break;
+
+case 69:
+{
+    static int t=0;
+
+    dma_display->clearScreen();
+
+    for(int x=0;x<64;x++)
+    {
+        pixel565(x,8+4*sin((x+t)*0.15),rainbow(x*4));
+        pixel565(x,8+4*cos((x+t)*0.15),rainbow(x*4+100));
+    }
+
+    t++;
+    delay(speed);
+}
+break;
+
+case 70:
+{
+    static float a=0;
+
+    dma_display->clearScreen();
+
+    for(float r=0;r<15;r+=0.2)
+    {
+        int x=32+r*cos(a+r);
+        int y=8+r*sin(a+r);
+
+        pixel565(x,y,rainbow(r*15+a*20));
+    }
+
+    a+=0.15;
+
+    delay(speed);
+}
+break;
+
+case 71:
+{
+    static int y=0;
+
+    dma_display->clearScreen();
+
+    for(int x=0;x<64;x++)
+    {
+        pixel565(x,y,rainbow(x*4));
+        pixel565(63-x,15-y,rainbow(x*4+80));
+    }
+
+    y++;
+    if(y>15)y=0;
+
+    delay(speed);
+}
+break;
+
+case 72:
+{
+    static int y=0;
+
+    dma_display->clearScreen();
+
+    for(int x=0;x<64;x++)
+        pixel565(x,y,rainbow(x*3));
+
+    y++;
+    if(y>=16)y=0;
+
+    delay(speed);
+}
+break;
+
+case 73:
+{
+    static int x=0;
+
+    dma_display->clearScreen();
+
+    for(int y=0;y<16;y++)
+        pixel565(x,y,rainbow(y*16));
+
+    x++;
+    if(x>=64)x=0;
+
+    delay(speed);
+}
+break;
+
+case 74:
+{
+    static int t=0;
+
+    for(int y=0;y<16;y++)
+        for(int x=0;x<64;x++)
+        {
+            uint8_t c=
+            128+
+            64*sin((x+t)*0.2)+
+            64*sin((y+t)*0.25)+
+            32*cos((x+y+t)*0.15);
+
+            pixel565(x,y,rainbow(c));
+        }
+
+    t++;
+    delay(speed);
+}
+break;
+
+case 75:
+{
+    static int r=0;
+
+    dma_display->clearScreen();
+
+    for(float a=0;a<6.28;a+=0.08)
+    {
+        pixel565(32+r*cos(a),
+                 8+r*sin(a),
+                 rainbow(a*50+r*20));
+    }
+
+    r++;
+    if(r>20)r=0;
+
+    delay(speed);
+}
+break;
+
+case 81:
+{
+    static uint8_t level[64];
+    static uint8_t peak[64];
+
+    for(int x=0;x<64;x++)
+    {
+        int target=random(0,17);
+
+        if(level[x]<target)
+            level[x]+=2;
+        else if(level[x]>target)
+            level[x]--;
+
+        if(level[x]>15) level[x]=15;
+
+        if(level[x]>peak[x])
+            peak[x]=level[x];
+        else if(peak[x]>0)
+            peak[x]--;
+
+        for(int y=0;y<16;y++)
+            pixel(x,y,0,0,0);
+
+        for(int y=0;y<level[x];y++)
+        {
+            if(y<5)
+                pixel(x,15-y,0,255,0);
+            else if(y<10)
+                pixel(x,15-y,255,255,0);
+            else
+                pixel(x,15-y,255,0,0);
+        }
+
+        pixel(x,15-peak[x],255,255,255);
+    }
+
+    delay(speed);
+}
+break;
+
+  case 82:
+{
+    static uint8_t level[32];
+    static uint8_t peak[32];
+
+    dma_display->clearScreen();
+
+    for(int i=0;i<32;i++)
+    {
+        int target=random(0,16);
+
+        if(level[i]<target)
+            level[i]+=2;
+        else if(level[i]>target)
+            level[i]--;
+
+        if(level[i]>peak[i])
+            peak[i]=level[i];
+        else if(peak[i]>0)
+            peak[i]--;
+
+        for(int x=i*2;x<i*2+2;x++)
+        {
+            for(int y=0;y<level[i];y++)
+            {
+                uint8_t r=0,g=255,b=0;
+
+                if(y>5){r=255;g=255;}
+                if(y>10){r=255;g=0;}
+
+                pixel(x,15-y,r,g,b);
+            }
+
+            pixel(x,15-peak[i],255,255,255);
+        }
+    }
+
+    delay(speed);
+}
+break;
+
+    /*case 88:
+    { receiveDDP(); }
+    */
+
+    case 99:
+      dma_display->drawPixel(truc_x, truc_y, dma_display->color565(color_r, color_g, color_b));
+      break;
+    
+    case 200:
+     for(int x=0;x<10;x++)
+     {
+       drawNumber(2, 4, x,color_r,color_g,color_b);     // đếm số 
+       delay(1000);
+       dma_display->clearScreen();
+    }
+    break;
+
+    case 201:
+    {
+      struct tm timeinfo;
+
+      if (getLocalTime(&timeinfo))
+      {
+          uint8_t hour_i   = timeinfo.tm_hour;
+          uint8_t minute_i = timeinfo.tm_min;
+
+          drawNumber(2, 4, hour_i / 10,color_r,color_g,color_b);      // Hàng chục giờ
+          drawNumber(8, 4, hour_i % 10,color_r,color_g,color_b);      // Hàng đơn vị giờ
+
+          // Dấu :
+          pixel(15, 5,color_r,color_g,color_b);
+          pixel(16, 5,color_r,color_g,color_b);
+          pixel(15, 6,color_r,color_g,color_b);
+          pixel(16, 6,color_r,color_g,color_b);
+          pixel(15, 9,color_r,color_g,color_b);
+          pixel(16,10,color_r,color_g,color_b);
+          pixel(15,10,color_r,color_g,color_b);
+          pixel(16, 9,color_r,color_g,color_b);
+
+          drawNumber(19, 4, minute_i / 10,color_r,color_g,color_b);   // Hàng chục phút
+          drawNumber(25, 4, minute_i % 10,color_r,color_g,color_b);   // Hàng đơn vị phút
+          delay(5000);
+          dma_display->clearScreen();
+      }
+    }    
+    break;
+
+    case 202:
+        {
+            struct tm timeinfo;
+
+            if (getLocalTime(&timeinfo))
+            {
+                uint8_t hour_i   = timeinfo.tm_hour;
+                uint8_t minute_i = timeinfo.tm_min;
+
+                dma_display->clearScreen();
+
+                uint8_t r,g,b;
+
+                gradientColor(2,r,g,b);
+                drawNumber(2,4,hour_i/10,r,g,b);
+
+                gradientColor(8,r,g,b);
+                drawNumber(8,4,hour_i%10,r,g,b);
+
+                gradientColor(15,r,g,b);
+                pixel(15,5,r,g,b);
+                pixel(16,5,r,g,b);
+                pixel(15,6,r,g,b);
+                pixel(16,6,r,g,b);
+                pixel(15,9,r,g,b);
+                pixel(16,9,r,g,b);
+                pixel(15,10,r,g,b);
+                pixel(16,10,r,g,b);
+
+                gradientColor(19,r,g,b);
+                drawNumber(19,4,minute_i/10,r,g,b);
+
+                gradientColor(25,r,g,b);
+                drawNumber(25,4,minute_i%10,r,g,b);
+
+                shift++;          // gradient chạy sang phải
+                delay(30);
+            }
+        }
+    break;
+
+
+    case 203:
+        {
+            struct tm timeinfo;
+
+            if (getLocalTime(&timeinfo))
+            {
+                gradientOffset += 5;      // tốc độ chạy màu
+
+                uint8_t hour_i   = timeinfo.tm_hour;
+                uint8_t minute_i = timeinfo.tm_min;
+
+                drawNumber2(2, 4, hour_i / 10);
+                drawNumber2(8, 4, hour_i % 10);
+
+                // dấu :
+                uint8_t r,g,b;
+
+                colorWheel(15*8 + gradientOffset, r,g,b);
+                pixel(15,5,r,g,b);
+                pixel(15,6,r,g,b);
+                pixel(15,9,r,g,b);
+                pixel(15,10,r,g,b);
+
+                colorWheel(16*8 + gradientOffset, r,g,b);
+                pixel(16,5,r,g,b);
+                pixel(16,6,r,g,b);
+                pixel(16,9,r,g,b);
+                pixel(16,10,r,g,b);
+
+                drawNumber2(19, 4, minute_i /10);
+                drawNumber2(25, 4, minute_i % 10);
+            }
+        }
+    break;
+
+    case 204:
+        dma_display->clearScreen(); 
+        drawNumber2(2,4,5);
+        delay(speed);
+    break;
+    
+  }
+  }
