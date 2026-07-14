@@ -1,0 +1,35 @@
+body{
+    background:#222;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+
+.container{
+    width:350px;
+    margin:auto;
+}
+
+input{
+    width:90%;
+    height:35px;
+    font-size:20px;
+    margin:6px;
+    text-align:center;
+    border:none;
+}
+
+
+
+button{
+    width:95%;
+    height:45px;
+    font-size:20px;
+    margin:6px;
+}
+
+select{
+    width:95%;
+    height:40px;
+    font-size:20px;
+}
