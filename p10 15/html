@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" type="text/css" href="style.css">
+<title>ESP32 HUB75</title>
+
+
+</head>
+
+<body>
+
+<h2>ESP32 HUB75</h2>
+
+<div class="container">
+
+<input id="x" type="number" min="0" max="63" placeholder="Trục X">
+
+<input id="y" type="number" min="0" max="15" placeholder="Trục Y">
+
+<input id="r" type="number" min="0" max="255" placeholder="Red">
+
+<input id="g" type="number" min="0" max="255" placeholder="Green">
+
+<input id="b" type="number" min="0" max="255" placeholder="Blue">
+
+<input id="speed" type="number" min="0" max="1000" placeholder="Tốc độ (ms)">
+
+<input id="bright" type="number" min="0" max="255" placeholder="Độ sáng (0-255)">
+
+<label>Mode</label>
+
+<input id="mode" list="modeList" value="2">
+
+<datalist id="modeList">
+    <option value="0">Vẽ hàng đầu</option>
+    <option value="1">Clear</option>
+    <option value="2">Pixel</option>
+</datalist>
+
+
+
+<button onclick="sendData()">Gửi</button>
+
+<button onclick="clearDisplay()">Xóa màn hình</button>
+
+<button onclick="drawLine()">Vẽ hàng đầu</button>
+
+<button onclick="drawPixel()">Vẽ Pixel</button>
+
+</div>
+
+<script>
+
+function send(v1, v2, v3, v4, v5, v6, v7, v8)
+{
+    fetch("/set?v1=" + v1 +
+            "&v2=" + v2 +
+            "&v3=" + v3 +
+            "&v4=" + v4 +
+            "&v5=" + v5 +
+            "&v6=" + v6 +
+            "&v7=" + v7 +
+            "&v8=" + v8
+        );
+}
+
+function sendData()
+{
+send(
+document.getElementById("x").value,
+document.getElementById("y").value,
+document.getElementById("r").value,
+document.getElementById("g").value,
+document.getElementById("b").value,
+document.getElementById("mode").value,
+document.getElementById("speed").value,
+document.getElementById("bright").value
+);
+}
+
+function clearDisplay()
+{
+send(0,0,0,0,0,1);
+}
+
+function drawLine()
+{
+send(0,0,255,0,0,0);
+}
+
+function drawPixel()
+{
+send(
+document.getElementById("x").value,
+document.getElementById("y").value,
+document.getElementById("r").value,
+document.getElementById("g").value,
+document.getElementById("b").value,
+2,
+document.getElementById("speed").value,
+document.getElementById("bright").value,
+);
+}
+
+document.addEventListener("keydown", function(e)
+{
+    if(e.key === "Enter")
+    {
+        e.preventDefault();
+        sendData();
+    }
+});
+</script>
+
+</body>
+</html>
