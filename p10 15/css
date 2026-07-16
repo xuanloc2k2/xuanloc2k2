@@ -1,35 +1,107 @@
 body{
-    background:#222;
-    color:white;
-    font-family:Arial;
+    font-family: Arial, Helvetica, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:30px;
+}
+
+h2{
     text-align:center;
+    color:#333;
 }
 
 .container{
-    width:350px;
+    max-width:500px;
     margin:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
 }
 
 input{
-    width:90%;
-    height:35px;
-    font-size:20px;
-    margin:6px;
-    text-align:center;
-    border:none;
+    padding:10px 12px;
+    border:2px solid #cfcfcf;
+    border-radius:8px;
+    font-size:16px;
+    outline:none;
+    transition:0.25s;
 }
 
+input:focus{
+    border-color:#2196F3;
+    box-shadow:0 0 8px rgba(33,150,243,.35);
+}
 
+/* ===== BUTTON ===== */
 
 button{
-    width:95%;
-    height:45px;
-    font-size:20px;
-    margin:6px;
+    padding:12px;
+    font-size:16px;
+    font-weight:bold;
+    border:2px solid #1976D2;
+    border-radius:10px;
+    background:white;
+    color:#1976D2;
+    cursor:pointer;
+    transition:all .25s ease;
 }
 
-select{
-    width:95%;
-    height:40px;
-    font-size:20px;
+/* Hover */
+button:hover{
+    background:#1976D2;
+    color:white;
+    transform:translateY(-2px);
+    box-shadow:0 6px 15px rgba(25,118,210,.35);
 }
+
+/* Khi nhấn */
+button:active{
+    transform:scale(.96);
+    box-shadow:none;
+}
+
+/* Nút đầu tiên */
+button:nth-of-type(1){
+    border-color:#4CAF50;
+    color:#4CAF50;
+}
+
+button:nth-of-type(1):hover{
+    background:#4CAF50;
+    color:white;
+}
+
+/* Nút xóa */
+button:nth-of-type(2){
+    border-color:#F44336;
+    color:#F44336;
+}
+
+button:nth-of-type(2):hover{
+    background:#F44336;
+    color:white;
+}
+
+/* Vẽ hàng */
+button:nth-of-type(3){
+    border-color:#FF9800;
+    color:#FF9800;
+}
+
+button:nth-of-type(3):hover{
+    background:#FF9800;
+    color:white;
+}
+
+/* Pixel */
+button:nth-of-type(4){
+    border-color:#9C27B0;
+    color:#9C27B0;
+}
+
+button:nth-of-type(4):hover{
+    background:#9C27B0;
+    color:white;
+}
+
+
