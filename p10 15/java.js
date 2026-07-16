@@ -1,3 +1,6 @@
+let r = 120;
+let g = 80;
+let b = 255;
 
 function send(v1, v2, v3, v4, v5, v6, v7, v8)
 {
@@ -11,6 +14,39 @@ function send(v1, v2, v3, v4, v5, v6, v7, v8)
             "&v8=" + v8
         );
 }
+
+
+
+function updateRGB(r, g, b)
+{
+    // Ô nhập số
+    document.getElementById("rNum").value = r;
+    document.getElementById("gNum").value = g;
+    document.getElementById("bNum").value = b;
+
+    // Thanh trượt
+    document.getElementById("rSlider").value = r;
+    document.getElementById("gSlider").value = g;
+    document.getElementById("bSlider").value = b;
+}
+function updateRGB(r, g, b)
+{
+    // Ô nhập số
+    document.getElementById("rNum").value = r;
+    document.getElementById("gNum").value = g;
+    document.getElementById("bNum").value = b;
+
+    // Thanh trượt
+    document.getElementById("rSlider").value = r;
+    document.getElementById("gSlider").value = g;
+    document.getElementById("bSlider").value = b;
+
+    // Hiển thị giá trị
+    document.getElementById("rVal").textContent = r;
+    document.getElementById("gVal").textContent = g;
+    document.getElementById("bVal").textContent = b;
+}
+
 
 
 
