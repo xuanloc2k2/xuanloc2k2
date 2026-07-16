@@ -5,9 +5,34 @@ body{
     padding:30px;
 }
 
+
+/* Thanh Red */
+#rSlider{
+    width: 100%;
+    margin:-10px;
+    margin-top: 10px;
+    accent-color: #ff0000;
+}
+
+/* Thanh Green */
+#gSlider{
+    margin:-10px;
+    margin-top: 10px;
+    width: 100%;
+    accent-color: #15ff00;
+}
+
+/* Thanh Blue */
+#bSlider{
+    width: 100%;
+    accent-color: #00a2ff;
+    margin: -10px;
+    margin-top: 10px;
+}
+
 h2{
     text-align:center;
-    color:#333;
+    color:#ff0000;
 }
 
 .container{
@@ -27,9 +52,24 @@ input{
     transition:0.25s;
 }
 
-input:focus{
-    border-color:#2196F3;
+#rNum:focus{
+    border-color:#ff0000;
     box-shadow:0 0 8px rgba(33,150,243,.35);
+}
+
+#gNum:focus{
+    border-color:#00ff62;
+    box-shadow:0 0 8px rgba(33,150,243,.35);
+}
+
+#bNum:focus{
+    border-color:#1100ff;
+    box-shadow:0 0 8px rgba(33,150,243,.35);
+}
+
+#text:focus{
+    border-color:#000000;
+    box-shadow:0 0 8px rgba(0, 0, 0, 0.35);
 }
 
 /* ===== BUTTON ===== */
