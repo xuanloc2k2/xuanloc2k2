@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" type="text/css" href="style.css">
-<script src="java.js"></script>
 <title>ESP32 HUB75</title>
 
 
@@ -21,6 +20,9 @@
 <input id="speed" type="number" min="0" max="1000" placeholder="Tốc độ (ms)">
 <input id="bright" type="number" min="0" max="255" placeholder="Độ sáng (0-255)">
 <input id="text" type="text" placeholder = "VĂN BẢN">
+<button onclick="textToIDs(document.getElementById('text').value)">Text -> ID</button>
+<label>ID</label>
+<textarea id="idOutput" rows="3" readonly></textarea>
 
 <input id="rSlider" type="range" min="0" max="255" value="0">
 <input id="rNum" type="number" min="0" max="255" placeholder="Red">
@@ -43,9 +45,10 @@
 <button onclick="sendData()">Send</button>
 <button onclick="clearDisplay()">Off</button>
 <button onclick="drawLine()">Vẽ hàng đầu</button>
-<button onclick="drawPixel()">Vẽ Pixel theo tọa độ</button>
+<button onclick="textToIDs()">Vẽ Pixel theo tọa độ</button>
+
 
 </div>
-
+<script src="java.js"></script>
 </body>
 </html>
