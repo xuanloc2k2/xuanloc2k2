@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="cocs.css">
+<script src="java.js"></script>
 <title>ESP32 HUB75</title>
 
 
@@ -14,22 +15,48 @@
 <h2>LED P10</h2>
 
 <div class="container">
+<div class="input-group">
+    <span>Trục X</span> 
+    <input id="x" type="number" min="0" max="63" value="0" placeholder="Trục X">
+</div>
 
-<input id="x" type="number" min="0" max="63" placeholder="Trục X">
-<input id="y" type="number" min="0" max="15" placeholder="Trục Y">
-<input id="speed" type="number" min="0" max="1000" placeholder="Tốc độ (ms)">
-<input id="bright" type="number" min="0" max="255" placeholder="Độ sáng (0-255)">
-<input id="text" type="text" placeholder = "VĂN BẢN">
-<button onclick="textToIDs(document.getElementById('text').value)">Text -> ID</button>
-<label>ID</label>
-<textarea id="idOutput" rows="3" readonly></textarea>
+<div class="input-group">
+    <span>Trục Y</span>
+    <input id="y" type="number" min="0" max="15" value="0" placeholder="Trục Y">
+</div>
 
-<input id="rSlider" type="range" min="0" max="255" value="0">
-<input id="rNum" type="number" min="0" max="255" placeholder="Red">
-<input id="gSlider" type="range" min="0" max="255" value="0">
-<input id="gNum" type="number" min="0" max="255" placeholder="Green">
-<input id="bSlider" type="range" min="0" max="255" value="0">
-<input id="bNum" type="number" min="0" max="255" placeholder="Blue">
+<div class="input-group">
+    <span>Tốc độ</span>
+    <input id="speed" type="number" min="0" max="1000" value="500" placeholder="Tốc độ">
+</div>
+
+<div class="input-group">
+    <span>Độ sáng</span>
+    <input id="bright" type="number" min="0" max="255" value="50" placeholder="Độ sáng">
+</div>
+
+<div class="input-group">
+    <span>Văn bản</span>
+    <input id="text" type="text" value="hello word" placeholder="văn bản">
+</div>
+
+<div class="input-group">
+    <span>Red</span>
+    <input id="rNum" type="number" min="0" max="255" value="0">
+   <input id="rSlider" type="range" min="0" max="255" value="0">
+</div>
+
+<div class="input-group">
+    <span>Green</span>
+    <input id="gNum" type="number" min="0" max="255" value="50">3
+    <input id="gSlider" type="range" min="0" max="255" value="50" value="0">
+</div>
+
+<div class="input-group">
+    <span>Blue</span>
+    <input id="bSlider" type="range" min="0" max="255" value="50" value="0">
+    <input id="bNum" type="number" min="0" max="255" value="50">
+</div>
 
 <div id="colorPreview"></div>
 <label>Mode</label>
@@ -45,10 +72,13 @@
 <button onclick="sendData()">Send</button>
 <button onclick="clearDisplay()">Off</button>
 <button onclick="drawLine()">Vẽ hàng đầu</button>
-<button onclick="textToIDs()">Vẽ Pixel theo tọa độ</button>
-
+<button onclick="drawPixel()">Vẽ Pixel theo tọa độ</button>
+<button onclick="clock1()">Đồng hồ 1</button>
+<button onclick="clock2()">Đồng hồ 2</button>
+<button onclick="clock3()">Đồng hồ 3</button>
+<button onclick="clock4()">Đồng hồ 4</button>
 
 </div>
-<script src="java.js"></script>
+
 </body>
 </html>
