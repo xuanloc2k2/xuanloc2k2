@@ -1,5 +1,3 @@
-// Bảng ký tự -> ID
-
 const FONT_ID = {
     "0":0,  "1":1,  "2":2,  "3":3,  "4":4,
     "5":5,  "6":6,  "7":7,  "8":8,  "9":9,
@@ -126,3 +124,24 @@ function drawPixel()
     sendData()
 }
 
+
+function clock1()
+{
+    document.getElementById("mode").value = 200; // Cập nhật ô mode
+    sendData()
+}
+function clock2()
+{
+    document.getElementById("mode").value = 201; // Cập nhật ô mode
+    sendData()
+}
+function clock3()
+{
+    document.getElementById("mode").value = 202; // Cập nhật ô mode
+    sendData()
+}
+function clock4()
+{
+    document.getElementById("mode").value = 203; // Cập nhật ô mode
+    sendData()
+}
