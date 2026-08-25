@@ -5,12 +5,7 @@ body{
     padding:30px;
 }
 
-#idOutput{
-    margin-top: -15px;
-    height:30px
-    font-size: 20px;
-    
-}
+
 /* Thanh Red */
 #rSlider{
     width: 100%;
@@ -39,14 +34,27 @@ h2{
     text-align:center;
     color:#ff0000;
 }
+.container {
+    display: grid;
 
-.container{
-    max-width:500px;
-    margin:auto;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+    /* 2 cột bằng nhau */
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    width: 600px;
+    margin: auto;
 }
+
+
+.container input,
+.container button,
+.container label,
+#colorPreview {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 
 input{
     padding:10px 12px;
@@ -148,4 +156,3 @@ button:nth-of-type(4):hover{
     background:#9C27B0;
     color:white;
 }
-
