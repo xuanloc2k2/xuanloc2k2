@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
@@ -36,7 +37,7 @@ String wifiPASS = "";
 unsigned long thoiDiemKetNoi = 0;
 
 // ======================================
-// CAU HINH THOI GIAN NTP
+// CAU HINH NTP
 // ======================================
 
 const long gmtOffset_sec = 7 * 3600;
@@ -49,53 +50,62 @@ const int daylightOffset_sec = 0;
 void batWiFiAP();
 void khoiTaoNTP();
 void kiemTraKetNoiWiFi();
+
 void xuLyScan(AsyncWebServerRequest *request);
 void xuLyTrangThai(AsyncWebServerRequest *request);
 void xuLyKetNoi(AsyncWebServerRequest *request);
+
 void dangKyWeb();
 
 // ======================================
-// CHUYEN KY TU DAC BIET THANH JSON
+// JSON ESCAPE
 // ======================================
 
 String jsonEscape(const String &input) {
-  String output;
-  output.reserve(input.length() + 8);
 
-  for (size_t i = 0; i < input.length(); i++) {
-    char c = input[i];
+    String output;
 
-    switch (c) {
-      case '\"':
-        output += "\\\"";
-        break;
+    output.reserve(input.length() + 8);
 
-      case '\\':
-        output += "\\\\";
-        break;
+    for (size_t i = 0; i < input.length(); i++) {
 
-      case '\n':
-        output += "\\n";
-        break;
+        char c = input[i];
 
-      case '\r':
-        output += "\\r";
-        break;
+        switch (c) {
 
-      case '\t':
-        output += "\\t";
-        break;
+            case '\"':
+                output += "\\\"";
+                break;
 
-      default:
-        if ((uint8_t)c >= 0x20) {
-          output += c;
+            case '\\':
+                output += "\\\\";
+                break;
+
+            case '\n':
+                output += "\\n";
+                break;
+
+            case '\r':
+                output += "\\r";
+                break;
+
+            case '\t':
+                output += "\\t";
+                break;
+
+            default:
+
+                if ((uint8_t)c >= 0x20) {
+                    output += c;
+                }
+
+                break;
         }
-        break;
     }
-  }
 
-  return output;
+    return output;
 }
+
 
 // ======================================
 // KHOI TAO NTP
@@ -103,52 +113,69 @@ String jsonEscape(const String &input) {
 
 void khoiTaoNTP() {
 
-  if (WiFi.status() != WL_CONNECTED) {
-    return;
-  }
+    if (WiFi.status() != WL_CONNECTED) {
+        return;
+    }
 
-  configTime(
-    gmtOffset_sec,
-    daylightOffset_sec,
-    "pool.ntp.org",
-    "time.nist.gov",
-    "time.google.com"
-  );
+    configTime(
+        gmtOffset_sec,
+        daylightOffset_sec,
+        "pool.ntp.org",
+        "time.nist.gov",
+        "time.google.com"
+    );
 
-  ntpStarted = true;
+    ntpStarted = true;
 
-  Serial.println("[NTP] Da khoi tao dong bo thoi gian!");
+    Serial.println("[NTP] Da khoi tao dong bo thoi gian!");
 }
 
+
 // ======================================
-// BAT WIFI AP DE CAU HINH
+// BAT WIFI AP CAU HINH
 // ======================================
 
 void batWiFiAP() {
 
-  WiFi.mode(WIFI_AP_STA);
+    WiFi.mode(WIFI_AP_STA);
 
-  bool ketQua = WiFi.softAP(AP_SSID, AP_PASS);
+    bool ketQua = WiFi.softAP(
+        AP_SSID,
+        AP_PASS
+    );
 
-  if (ketQua) {
-    dnsServer.start(53, "*", WiFi.softAPIP());
+    if (ketQua) {
 
-    cheDoCauHinh = true;
+        dnsServer.start(
+            53,
+            "*",
+            WiFi.softAPIP()
+        );
 
-    Serial.println();
-    Serial.println("========== WIFI SETUP ==========");
-    Serial.print("[AP] Ten WiFi: ");
-    Serial.println(AP_SSID);
-    Serial.print("[AP] Mat khau: ");
-    Serial.println(AP_PASS);
-    Serial.print("[AP] Dia chi IP: ");
-    Serial.println(WiFi.softAPIP());
-    Serial.println("================================");
-  }
-  else {
-    Serial.println("[AP] Khong the khoi dong WiFi AP!");
-  }
+        cheDoCauHinh = true;
+
+        Serial.println();
+        Serial.println("========== WIFI SETUP ==========");
+
+        Serial.print("[AP] Ten WiFi: ");
+        Serial.println(AP_SSID);
+
+        Serial.print("[AP] Mat khau: ");
+        Serial.println(AP_PASS);
+
+        Serial.print("[AP] Dia chi IP: ");
+        Serial.println(WiFi.softAPIP());
+
+        Serial.println("================================");
+    }
+    else {
+
+        Serial.println(
+            "[AP] Khong the khoi dong WiFi AP!"
+        );
+    }
 }
+
 
 // ======================================
 // KIEM TRA KET NOI WIFI
@@ -156,190 +183,246 @@ void batWiFiAP() {
 
 void kiemTraKetNoiWiFi() {
 
-  if (!dangKetNoi) {
-    return;
-  }
+    if (!dangKetNoi) {
+        return;
+    }
 
-  if (WiFi.status() == WL_CONNECTED) {
+    // ----------------------------------
+    // KET NOI THANH CONG
+    // ----------------------------------
 
-    dangKetNoi = false;
+    if (WiFi.status() == WL_CONNECTED) {
 
-    Serial.println();
-    Serial.println("[WIFI] Ket noi thanh cong!");
+        dangKetNoi = false;
 
-    Serial.print("[WIFI] SSID: ");
-    Serial.println(WiFi.SSID());
+        Serial.println();
+        Serial.println("[WIFI] Ket noi thanh cong!");
 
-    Serial.print("[WIFI] Dia chi IP: ");
-    Serial.println(WiFi.localIP());
+        Serial.print("[WIFI] SSID: ");
+        Serial.println(WiFi.SSID());
 
-    khoiTaoNTP();
+        Serial.print("[WIFI] Dia chi IP: ");
+        Serial.println(WiFi.localIP());
 
-    // Tat AP cau hinh sau khi ket noi thanh cong
-    dnsServer.stop();
-    WiFi.softAPdisconnect(true);
-    WiFi.mode(WIFI_STA);
+        khoiTaoNTP();
 
-    cheDoCauHinh = false;
+        // Tat AP cau hinh
 
-    Serial.println("[AP] Da tat WiFi cau hinh.");
+        dnsServer.stop();
 
-    return;
-  }
+        WiFi.softAPdisconnect(true);
 
-  // Qua 20 giay ma chua ket noi duoc
-  if (millis() - thoiDiemKetNoi >= 20000) {
+        WiFi.mode(WIFI_STA);
 
-    dangKetNoi = false;
+        cheDoCauHinh = false;
 
-    Serial.println();
-    Serial.println("[WIFI] Ket noi that bai!");
-    Serial.println("[WIFI] Quay lai che do cau hinh AP...");
+        Serial.println("[AP] Da tat WiFi cau hinh.");
 
-    WiFi.disconnect();
+        Serial.println(
+            "[SYSTEM] Hay truy cap IP moi cua ESP8266."
+        );
 
-    batWiFiAP();
-  }
+        return;
+    }
+
+    // ----------------------------------
+    // KET NOI THAT BAI SAU 20 GIAY
+    // ----------------------------------
+
+    if (millis() - thoiDiemKetNoi >= 20000) {
+
+        dangKetNoi = false;
+
+        Serial.println();
+        Serial.println("[WIFI] Ket noi that bai!");
+
+        Serial.println(
+            "[WIFI] Quay lai che do cau hinh AP..."
+        );
+
+        WiFi.disconnect();
+
+        batWiFiAP();
+    }
 }
 
+
 // ======================================
-// QUET WIFI
+// API QUET WIFI
 // ======================================
 
 void xuLyScan(AsyncWebServerRequest *request) {
 
-  Serial.println();
-  Serial.println("========== QUET WIFI ==========");
+    // Khong quet khi dang ket noi WiFi
+    if (dangKetNoi) {
 
-  int soMang = WiFi.scanComplete();
+        request->send(
+            409,
+            "application/json",
+            "{\"done\":false,\"message\":\"Dang ket noi WiFi\"}"
+        );
 
-  // ----------------------------------
-  // WIFI DANG QUET
-  // ----------------------------------
-
-  if (soMang == WIFI_SCAN_RUNNING) {
-
-    if (!dangQuetWiFi) {
-      Serial.println("[SCAN] WiFi dang quet...");
-      dangQuetWiFi = true;
+        return;
     }
 
-    request->send(
-      200,
-      "application/json",
-      "{\"done\":false}"
-    );
+    int soMang = WiFi.scanComplete();
 
-    return;
-  }
+    // ----------------------------------
+    // WIFI DANG QUET
+    // ----------------------------------
 
-  // ----------------------------------
-  // CHUA QUET HOAC QUET THAT BAI
-  // ----------------------------------
+    if (soMang == WIFI_SCAN_RUNNING) {
 
-  if (soMang == WIFI_SCAN_FAILED) {
+        if (!dangQuetWiFi) {
 
-    if (dangQuetWiFi) {
-      Serial.println("[SCAN] Qua trinh quet that bai!");
-      dangQuetWiFi = false;
+            Serial.println("[SCAN] WiFi dang quet...");
+
+            dangQuetWiFi = true;
+        }
+
+        request->send(
+            200,
+            "application/json",
+            "{\"done\":false}"
+        );
+
+        return;
     }
 
-    Serial.println("[SCAN] Bat dau quet WiFi...");
+    // ----------------------------------
+    // CHUA QUET HOAC QUET THAT BAI
+    // ----------------------------------
+
+    if (soMang == WIFI_SCAN_FAILED) {
+
+        if (dangQuetWiFi) {
+
+            Serial.println(
+                "[SCAN] Qua trinh quet that bai!"
+            );
+
+            dangQuetWiFi = false;
+        }
+
+        Serial.println("[SCAN] Bat dau quet WiFi...");
+
+        WiFi.scanDelete();
+
+        int ketQua = WiFi.scanNetworks(
+            true,
+            true
+        );
+
+        if (ketQua == WIFI_SCAN_RUNNING) {
+
+            dangQuetWiFi = true;
+
+            Serial.println(
+                "[SCAN] Da gui lenh quet!"
+            );
+
+        }
+        else {
+
+            Serial.println(
+                "[SCAN] Khong the bat dau quet!"
+            );
+
+        }
+
+        request->send(
+            200,
+            "application/json",
+            "{\"done\":false}"
+        );
+
+        return;
+    }
+
+    // ----------------------------------
+    // QUET WIFI HOAN TAT
+    // ----------------------------------
+
+    Serial.println();
+    Serial.println("[SCAN] Quet WiFi hoan tat!");
+
+    Serial.print("[SCAN] Tim thay: ");
+    Serial.print(soMang);
+    Serial.println(" mang WiFi");
+
+    String json =
+        "{\"done\":true,\"networks\":[";
+
+    for (int i = 0; i < soMang; i++) {
+
+        String tenWiFi = WiFi.SSID(i);
+
+        int rssi = WiFi.RSSI(i);
+
+        bool baoMat =
+            (WiFi.encryptionType(i) != ENC_TYPE_NONE);
+
+        Serial.println("-----------------------------");
+
+        Serial.print("[WIFI] STT: ");
+        Serial.println(i + 1);
+
+        Serial.print("[WIFI] SSID: ");
+        Serial.println(tenWiFi);
+
+        Serial.print("[WIFI] RSSI: ");
+        Serial.print(rssi);
+        Serial.println(" dBm");
+
+        Serial.print("[WIFI] Bao mat: ");
+
+        Serial.println(
+            baoMat ? "Co mat khau" : "Khong mat khau"
+        );
+
+        if (i > 0) {
+            json += ",";
+        }
+
+        json += "{";
+
+        json += "\"ssid\":\"";
+        json += jsonEscape(tenWiFi);
+        json += "\",";
+
+        json += "\"rssi\":";
+        json += String(rssi);
+        json += ",";
+
+        json += "\"secure\":";
+        json += baoMat ? "true" : "false";
+
+        json += "}";
+    }
+
+    json += "]}";
+
+    if (soMang == 0) {
+
+        Serial.println(
+            "[SCAN] Khong tim thay WiFi nao!"
+        );
+    }
+
+    Serial.println("[SCAN] Da gui danh sach WiFi.");
+    Serial.println("================================");
+
+    dangQuetWiFi = false;
 
     WiFi.scanDelete();
 
-    int ketQua = WiFi.scanNetworks(true, true);
-
-    if (ketQua == WIFI_SCAN_RUNNING) {
-
-      dangQuetWiFi = true;
-
-      Serial.println("[SCAN] Da gui lenh quet!");
-      Serial.println("[SCAN] Dang cho ket qua...");
-    }
-    else if (ketQua == WIFI_SCAN_FAILED) {
-
-      Serial.println("[SCAN] Khong the bat dau quet!");
-    }
-
     request->send(
-      200,
-      "application/json",
-      "{\"done\":false}"
+        200,
+        "application/json; charset=utf-8",
+        json
     );
-
-    return;
-  }
-
-  // ----------------------------------
-  // QUET WIFI HOAN TAT
-  // ----------------------------------
-
-  Serial.println("[SCAN] Quet WiFi hoan tat!");
-
-  Serial.print("[SCAN] Tim thay: ");
-  Serial.print(soMang);
-  Serial.println(" mang WiFi");
-
-  String json = "{\"done\":true,\"networks\":[";
-
-  for (int i = 0; i < soMang; i++) {
-
-    String tenWiFi = WiFi.SSID(i);
-    int rssi = WiFi.RSSI(i);
-
-    bool baoMat =
-      (WiFi.encryptionType(i) != ENC_TYPE_NONE);
-
-    Serial.println("-----------------------------");
-
-    Serial.print("[WIFI] STT: ");
-    Serial.println(i + 1);
-
-    Serial.print("[WIFI] SSID: ");
-    Serial.println(tenWiFi);
-
-    Serial.print("[WIFI] RSSI: ");
-    Serial.print(rssi);
-    Serial.println(" dBm");
-
-    Serial.print("[WIFI] Bao mat: ");
-    Serial.println(
-      baoMat ? "Co mat khau" : "Khong mat khau"
-    );
-
-    if (i > 0) {
-      json += ",";
-    }
-
-    json += "{";
-    json += "\"ssid\":\"" + jsonEscape(tenWiFi) + "\",";
-    json += "\"rssi\":" + String(rssi) + ",";
-    json += "\"secure\":";
-    json += baoMat ? "true" : "false";
-    json += "}";
-  }
-
-  json += "]}";
-
-  if (soMang == 0) {
-    Serial.println("[SCAN] Khong tim thay WiFi nao!");
-  }
-
-  Serial.println("-----------------------------");
-  Serial.println("[SCAN] Da gui danh sach WiFi ve trinh duyet");
-  Serial.println("================================");
-
-  dangQuetWiFi = false;
-
-  WiFi.scanDelete();
-
-  request->send(
-    200,
-    "application/json; charset=utf-8",
-    json
-  );
 }
+
 
 // ======================================
 // API TRANG THAI WIFI
@@ -347,43 +430,63 @@ void xuLyScan(AsyncWebServerRequest *request) {
 
 void xuLyTrangThai(AsyncWebServerRequest *request) {
 
-  bool daKetNoi = (WiFi.status() == WL_CONNECTED);
+    bool daKetNoi =
+        (WiFi.status() == WL_CONNECTED);
 
-  String trangThai;
+    String trangThai;
 
-  if (dangKetNoi) {
-    trangThai = "Dang ket noi WiFi";
-  }
-  else if (daKetNoi) {
-    trangThai = "Da ket noi WiFi";
-  }
-  else {
-    trangThai = "Chua ket noi WiFi";
-  }
+    if (dangKetNoi) {
 
-  String ip = daKetNoi
-              ? WiFi.localIP().toString()
-              : WiFi.softAPIP().toString();
+        trangThai = "Dang ket noi WiFi";
+    }
+    else if (daKetNoi) {
 
-  String json = "{";
+        trangThai = "Da ket noi WiFi";
+    }
+    else if (cheDoCauHinh) {
 
-  json += "\"connected\":";
-  json += daKetNoi ? "true" : "false";
+        trangThai = "Chua ket noi WiFi - Dang cau hinh";
+    }
+    else {
 
-  json += ",\"status\":\"";
-  json += jsonEscape(trangThai);
+        trangThai = "Chua ket noi WiFi";
+    }
 
-  json += "\",\"ip\":\"";
-  json += ip;
+    String ip;
 
-  json += "\"}";
+    if (daKetNoi) {
 
-  request->send(
-    200,
-    "application/json; charset=utf-8",
-    json
-  );
+        ip = WiFi.localIP().toString();
+    }
+    else if (cheDoCauHinh) {
+
+        ip = WiFi.softAPIP().toString();
+    }
+    else {
+
+        ip = "0.0.0.0";
+    }
+
+    String json = "{";
+
+    json += "\"connected\":";
+    json += daKetNoi ? "true" : "false";
+
+    json += ",\"status\":\"";
+    json += jsonEscape(trangThai);
+
+    json += "\",\"ip\":\"";
+    json += ip;
+
+    json += "\"}";
+
+    request->send(
+        200,
+        "application/json; charset=utf-8",
+        json
+    );
 }
+
 
 // ======================================
 // API KET NOI WIFI
@@ -391,70 +494,90 @@ void xuLyTrangThai(AsyncWebServerRequest *request) {
 
 void xuLyKetNoi(AsyncWebServerRequest *request) {
 
-  if (!request->hasParam("ssid", true) ||
-      !request->hasParam("pass", true)) {
+    // ----------------------------------
+    // KIEM TRA DU LIEU
+    // ----------------------------------
+
+    if (!request->hasParam("ssid", true) ||
+        !request->hasParam("pass", true)) {
+
+        request->send(
+            400,
+            "application/json",
+            "{\"success\":false,\"message\":\"Thieu thong tin WiFi\"}"
+        );
+
+        return;
+    }
+
+    wifiSSID =
+        request->getParam("ssid", true)->value();
+
+    wifiPASS =
+        request->getParam("pass", true)->value();
+
+    wifiSSID.trim();
+
+    if (wifiSSID.length() == 0) {
+
+        request->send(
+            400,
+            "application/json",
+            "{\"success\":false,\"message\":\"Ten WiFi khong hop le\"}"
+        );
+
+        return;
+    }
+
+    // ----------------------------------
+    // KIEM TRA DANG KET NOI
+    // ----------------------------------
+
+    if (dangKetNoi) {
+
+        request->send(
+            409,
+            "application/json",
+            "{\"success\":false,\"message\":\"Dang co yeu cau ket noi WiFi\"}"
+        );
+
+        return;
+    }
+
+    // ----------------------------------
+    // PHAN HOI TRUOC
+    // ----------------------------------
 
     request->send(
-      400,
-      "application/json",
-      "{\"success\":false,\"message\":\"Thieu thong tin WiFi\"}"
+        200,
+        "application/json",
+        "{\"success\":true,\"message\":\"Dang ket noi WiFi...\"}"
     );
 
-    return;
-  }
+    Serial.println();
+    Serial.println("========== KET NOI WIFI ==========");
 
-  wifiSSID = request->getParam("ssid", true)->value();
-  wifiPASS = request->getParam("pass", true)->value();
+    Serial.print("[WIFI] SSID: ");
+    Serial.println(wifiSSID);
 
-  wifiSSID.trim();
+    // ----------------------------------
+    // BAT DAU KET NOI
+    // ----------------------------------
 
-  if (wifiSSID.length() == 0) {
+    WiFi.mode(WIFI_AP_STA);
 
-    request->send(
-      400,
-      "application/json",
-      "{\"success\":false,\"message\":\"Ten WiFi khong hop le\"}"
+    WiFi.begin(
+        wifiSSID.c_str(),
+        wifiPASS.c_str()
     );
 
-    return;
-  }
+    dangKetNoi = true;
 
-  if (dangKetNoi) {
+    thoiDiemKetNoi = millis();
 
-    request->send(
-      409,
-      "application/json",
-      "{\"success\":false,\"message\":\"Dang co yeu cau ket noi WiFi\"}"
-    );
-
-    return;
-  }
-
-  // Phan hoi cho trinh duyet truoc khi bat dau ket noi
-  request->send(
-    200,
-    "application/json",
-    "{\"success\":true,\"message\":\"Dang ket noi WiFi...\"}"
-  );
-
-  Serial.println();
-  Serial.println("========== KET NOI WIFI ==========");
-
-  Serial.print("[WIFI] SSID: ");
-  Serial.println(wifiSSID);
-
-  WiFi.mode(WIFI_AP_STA);
-
-  WiFi.begin(
-    wifiSSID.c_str(),
-    wifiPASS.c_str()
-  );
-
-  dangKetNoi = true;
-  thoiDiemKetNoi = millis();
-
-  Serial.println("[WIFI] Dang cho ket noi...");
+    Serial.println("[WIFI] Dang cho ket noi...");
 }
+
 
 // ======================================
 // DANG KY CAC DUONG DAN WEB
@@ -462,75 +585,129 @@ void xuLyKetNoi(AsyncWebServerRequest *request) {
 
 void dangKyWeb() {
 
-  // Trang chu
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // ----------------------------------
+    // TRANG CHU
+    // ----------------------------------
 
-    if (!littleFS_OK || !LittleFS.exists("/clock.html")) {
-      request->send(
-        500,
-        "text/plain; charset=utf-8",
-        "Khong tim thay clock.html trong LittleFS"
-      );
-      return;
-    }
+    server.on("/", HTTP_GET,
+        [](AsyncWebServerRequest *request) {
 
-    request->send(
-      LittleFS,
-      "/clock.html",
-      "text/html; charset=utf-8"
+            if (!littleFS_OK ||
+                !LittleFS.exists("/clock.html")) {
+
+                request->send(
+                    500,
+                    "text/plain; charset=utf-8",
+                    "Khong tim thay clock.html trong LittleFS"
+                );
+
+                return;
+            }
+
+            request->send(
+                LittleFS,
+                "/clock.html",
+                "text/html; charset=utf-8"
+            );
+        }
     );
-  });
 
-  // CSS
-  server.on("/clock.css", HTTP_GET, [](AsyncWebServerRequest *request) {
 
-    request->send(
-      LittleFS,
-      "/clock.css",
-      "text/css; charset=utf-8"
+    // ----------------------------------
+    // CSS
+    // ----------------------------------
+
+    server.on("/clock.css", HTTP_GET,
+        [](AsyncWebServerRequest *request) {
+
+            request->send(
+                LittleFS,
+                "/clock.css",
+                "text/css; charset=utf-8"
+            );
+        }
     );
-  });
 
-  // JavaScript
-  server.on("/clock.js", HTTP_GET, [](AsyncWebServerRequest *request) {
 
-    request->send(
-      LittleFS,
-      "/clock.js",
-      "application/javascript; charset=utf-8"
+    // ----------------------------------
+    // JAVASCRIPT
+    // ----------------------------------
+
+    server.on("/clock.js", HTTP_GET,
+        [](AsyncWebServerRequest *request) {
+
+            request->send(
+                LittleFS,
+                "/clock.js",
+                "application/javascript; charset=utf-8"
+            );
+        }
     );
-  });
 
-  // Quet WiFi
-  server.on("/scan", HTTP_GET, [](AsyncWebServerRequest *request) {
-    xuLyScan(request);
-  });
 
-  // Ket noi WiFi
-  server.on("/connect", HTTP_POST, [](AsyncWebServerRequest *request) {
-    xuLyKetNoi(request);
-  });
+    // ----------------------------------
+    // API QUET WIFI
+    // ----------------------------------
 
-  // Trang thai WiFi
-  server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
-    xuLyTrangThai(request);
-  });
+    server.on("/scan", HTTP_GET,
+        [](AsyncWebServerRequest *request) {
 
-  // Khong con API /set dieu khien LED
-
-  server.onNotFound([](AsyncWebServerRequest *request) {
-
-    request->send(
-      404,
-      "text/plain; charset=utf-8",
-      "Khong tim thay trang"
+            xuLyScan(request);
+        }
     );
-  });
 
-  server.begin();
 
-  Serial.println("[WEB] Web Server da khoi dong!");
+    // ----------------------------------
+    // API KET NOI WIFI
+    // ----------------------------------
+
+    server.on("/connect", HTTP_POST,
+        [](AsyncWebServerRequest *request) {
+
+            xuLyKetNoi(request);
+        }
+    );
+
+
+    // ----------------------------------
+    // API TRANG THAI
+    // ----------------------------------
+
+    server.on("/status", HTTP_GET,
+        [](AsyncWebServerRequest *request) {
+
+            xuLyTrangThai(request);
+        }
+    );
+
+
+    // ----------------------------------
+    // KHONG TIM THAY DUONG DAN
+    // ----------------------------------
+
+    server.onNotFound(
+        [](AsyncWebServerRequest *request) {
+
+            request->send(
+                404,
+                "text/plain; charset=utf-8",
+                "Khong tim thay trang"
+            );
+        }
+    );
+
+
+    // ----------------------------------
+    // KHOI DONG SERVER
+    // ----------------------------------
+
+    server.begin();
+
+    Serial.println(
+        "[WEB] Web Server da khoi dong!"
+    );
 }
+
 
 // ======================================
 // SETUP
@@ -538,86 +715,113 @@ void dangKyWeb() {
 
 void setup() {
 
-  Serial.begin(9600);
-  delay(100);
+    Serial.begin(9600);
 
-  Serial.println();
-  Serial.println("================================");
-  Serial.println("      ESP8266 WIFI WEB SERVER");
-  Serial.println("================================");
+    delay(100);
 
-  // ----------------------------------
-  // KHOI DONG LITTLEFS
-  // ----------------------------------
+    Serial.println();
+    Serial.println("================================");
+    Serial.println("      ESP8266 WIFI WEB SERVER");
+    Serial.println("================================");
 
-  if (!LittleFS.begin()) {
 
-    littleFS_OK = false;
+    // ----------------------------------
+    // KHOI DONG LITTLEFS
+    // ----------------------------------
 
-    Serial.println("[FS] Loi khoi dong LittleFS!");
-  }
-  else {
+    if (!LittleFS.begin()) {
 
-    littleFS_OK = true;
+        littleFS_OK = false;
 
-    Serial.println("[FS] LittleFS OK!");
-
-    Serial.println("[FS] Danh sach file:");
-
-    Dir dir = LittleFS.openDir("/");
-
-    while (dir.next()) {
-      Serial.println(dir.fileName());
+        Serial.println(
+            "[FS] Loi khoi dong LittleFS!"
+        );
     }
-  }
+    else {
 
-  // ----------------------------------
-  // THU KET NOI WIFI DA LUU
-  // ----------------------------------
+        littleFS_OK = true;
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin();
+        Serial.println("[FS] LittleFS OK!");
 
-  Serial.println("[WIFI] Dang kiem tra WiFi da luu...");
+        Serial.println("[FS] Danh sach file:");
 
-  unsigned long batDau = millis();
+        Dir dir = LittleFS.openDir("/");
 
-  while (WiFi.status() != WL_CONNECTED &&
-         millis() - batDau < 15000) {
+        while (dir.next()) {
 
-    delay(300);
-    Serial.print(".");
-  }
+            Serial.println(
+                dir.fileName()
+            );
+        }
+    }
 
-  Serial.println();
 
-  if (WiFi.status() == WL_CONNECTED) {
+    // ----------------------------------
+    // THU KET NOI WIFI DA LUU
+    // ----------------------------------
 
-    Serial.println("[WIFI] Ket noi WiFi da luu thanh cong!");
+    WiFi.mode(WIFI_STA);
 
-    Serial.print("[WIFI] SSID: ");
-    Serial.println(WiFi.SSID());
+    WiFi.begin();
 
-    Serial.print("[WIFI] IP: ");
-    Serial.println(WiFi.localIP());
+    Serial.println(
+        "[WIFI] Dang kiem tra WiFi da luu..."
+    );
 
-    khoiTaoNTP();
-  }
-  else {
+    unsigned long batDau = millis();
 
-    Serial.println("[WIFI] Khong co WiFi da luu!");
+    while (
+        WiFi.status() != WL_CONNECTED &&
+        millis() - batDau < 15000
+    ) {
 
-    batWiFiAP();
-  }
+        delay(300);
 
-  // ----------------------------------
-  // KHOI DONG WEB SERVER
-  // ----------------------------------
+        Serial.print(".");
+    }
 
-  dangKyWeb();
+    Serial.println();
 
-  Serial.println("[SYSTEM] ESP8266 san sang!");
+
+    // ----------------------------------
+    // KIEM TRA KET QUA
+    // ----------------------------------
+
+    if (WiFi.status() == WL_CONNECTED) {
+
+        Serial.println(
+            "[WIFI] Ket noi WiFi da luu thanh cong!"
+        );
+
+        Serial.print("[WIFI] SSID: ");
+        Serial.println(WiFi.SSID());
+
+        Serial.print("[WIFI] IP: ");
+        Serial.println(WiFi.localIP());
+
+        khoiTaoNTP();
+    }
+    else {
+
+        Serial.println(
+            "[WIFI] Khong co WiFi da luu!"
+        );
+
+        batWiFiAP();
+    }
+
+
+    // ----------------------------------
+    // KHOI DONG WEB SERVER
+    // ----------------------------------
+
+    dangKyWeb();
+
+    Serial.println(
+        "[SYSTEM] ESP8266 san sang!"
+    );
 }
+
 
 // ======================================
 // LOOP
@@ -625,18 +829,29 @@ void setup() {
 
 void loop() {
 
-  // Xu ly DNS khi dang o che do AP
-  if (cheDoCauHinh) {
-    dnsServer.processNextRequest();
-  }
+    // Xu ly DNS khi dang o che do AP
 
-  // Kiem tra tien trinh ket noi WiFi
-  kiemTraKetNoiWiFi();
+    if (cheDoCauHinh) {
 
-  // Khoi tao lai NTP neu chua khoi tao
-  if (WiFi.status() == WL_CONNECTED && !ntpStarted) {
-    khoiTaoNTP();
-  }
+        dnsServer.processNextRequest();
+    }
 
-  yield();
+
+    // Kiem tra tien trinh ket noi WiFi
+
+    kiemTraKetNoiWiFi();
+
+
+    // Khoi tao lai NTP neu chua khoi tao
+
+    if (
+        WiFi.status() == WL_CONNECTED &&
+        !ntpStarted
+    ) {
+
+        khoiTaoNTP();
+    }
+
+
+    yield();
 }
