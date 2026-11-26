@@ -1,185 +1,157 @@
-
-/* =====================================
-   GIAO DIEN CHUNG
-===================================== */
-
+```css
 * {
     box-sizing: border-box;
 }
 
 body {
-    background: #101827;
-    color: white;
-    font-family: Arial;
-    text-align: center;
-    padding: 15px;
     margin: 0;
+    padding: 20px;
+
+    font-family: Arial, sans-serif;
+
+    background: #10131c;
+
+    color: white;
 }
 
 .container {
+    width: 100%;
     max-width: 420px;
-    margin: auto;
-    background: #1e293b;
-    padding: 20px;
+
+    margin: 30px auto;
+
+    padding: 25px;
+
+    background: #1d2230;
+
     border-radius: 15px;
+
+    box-shadow: 0 5px 25px rgba(0,0,0,0.4);
 }
 
 h2 {
-    color: #38bdf8;
+    text-align: center;
+
+    color: #00d9ff;
+
+    margin-top: 0;
+    margin-bottom: 30px;
 }
 
-h3 {
-    color: #38bdf8;
-    font-size: 17px;
+.heading {
+    text-align: center;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-bottom: 20px;
 }
 
-
-/* =====================================
-   WIFI
-===================================== */
-
-select,
-input,
 button {
     width: 100%;
+
     padding: 13px;
+
     margin-top: 12px;
-    border-radius: 8px;
+
     border: none;
-    font-size: 16px;
+
+    border-radius: 8px;
+
+    background: #008cff;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+button:hover {
+    background: #006fd1;
+}
+
+button:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
+
+.refresh {
+    background: #444d61;
+}
+
+.refresh:hover {
+    background: #596780;
 }
 
 select,
 input {
-    background: #334155;
+    width: 100%;
+
+    padding: 13px;
+
+    margin-top: 12px;
+
+    border: 1px solid #424b60;
+
+    border-radius: 8px;
+
+    background: #111722;
+
     color: white;
+
+    font-size: 15px;
+
+    outline: none;
 }
 
-button {
-    background: #0284c7;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
+select:focus,
+input:focus {
+    border-color: #00bfff;
 }
 
-button:active {
-    opacity: 0.7;
+.status-box {
+    margin-top: 25px;
+
+    padding: 12px;
+
+    background: #111722;
+
+    border-radius: 8px;
+
+    border-left: 4px solid #00d9ff;
 }
 
-.refresh {
-    background: #475569;
-}
+.status-box p {
+    margin: 7px 0;
 
-.status {
-    color: #38bdf8;
-    margin-top: 15px;
+    font-size: 14px;
+
     overflow-wrap: anywhere;
 }
 
+#status {
+    color: #00d9ff;
+}
 
+#ip {
+    color: #8effa0;
+}
 
-/* =====================================
-   DIEN THOAI
-===================================== */
-
-@media (max-width: 400px) {
+@media (max-width: 480px) {
 
     body {
         padding: 10px;
     }
 
     .container {
-        padding: 15px;
-    }
+        margin-top: 15px;
 
-    .control-box {
-        padding: 14px;
-    }
-
-    .rgb-values {
-        gap: 6px;
-    }
-
-    .color-picker {
-        width: 220px;
-        height: 220px;
-    }
-}
-
-
-#colorPicker {
-    display: flex;
-    justify-content: center;
-}
-
-#preview {
-    height: 50px;
-    margin-top: 20px;
-    border-radius: 10px;
-    background: red;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin-top: 15px;
-    background: #171923;
-    color: white;
-    border: 1px solid #555;
-    border-radius: 6px;
-    text-align: center;
-}
-/* =================================
-   NUT CHON CHE DO
-================================= */
-
-.mode-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    width: 100%;
-    margin: 20px 0;
-}
-
-.mode-buttons button {
-    flex: 1;
-    min-width: 0;
-    height: 60px;
-    padding: 13px 5px;
-
-    border: none;
-    border-radius: 10px;
-
-    background: #343b50;
-    color: white;
-
-    font-size: 13px;
-    font-weight: bold;
-
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.mode-buttons button:hover {
-    background: #536dfe;
-    transform: translateY(-2px);
-}
-
-.mode-buttons button:active {
-    transform: scale(0.96);
-}
-
-/* MOBILE */
-
-@media (max-width: 400px) {
-
-    .mode-buttons {
-        gap: 6px;
-    }
-
-    .mode-buttons button {
-        font-size: 11px;
-        padding: 12px 3px;
+        padding: 20px;
     }
 
 }
