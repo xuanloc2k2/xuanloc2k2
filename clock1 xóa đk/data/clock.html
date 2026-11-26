@@ -1,15 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
 
-<script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="clock.css">
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
 
-<title>Đồng hồ LED RGB</title>
+    <link rel="stylesheet" href="clock.css">
+
+    <title>Đồng hồ LED RGB</title>
 </head>
 
 <body>
@@ -18,33 +20,72 @@
 
     <h2>ĐỒNG HỒ LED RGB</h2>
 
+    <!-- ================================= -->
     <!-- GIAO DIEN WIFI -->
-    <div id="wifiPanel" style="display:block">
+    <!-- ================================= -->
 
-        <p>CẤU HÌNH WIFI</p>
+    <div id="wifiPanel">
 
-        <button class="refresh" onclick="quetWiFi()">
+        <p class="heading">CẤU HÌNH WIFI</p>
+
+        <button
+            type="button"
+            class="refresh"
+            id="btnScan"
+            onclick="quetWiFi()">
+
             QUÉT WIFI
+
         </button>
 
         <form id="wifiForm">
 
-            <select name="ssid" id="wifi" required>
-                <option value="">Đang quét WiFi...</option>
+            <select
+                name="ssid"
+                id="wifi"
+                required>
+
+                <option value="">
+                    Đang quét WiFi...
+                </option>
+
             </select>
 
-            <input type="password"
-                   name="pass"
-                   id="pass"
-                   placeholder="Nhập mật khẩu WiFi">
+            <input
+                type="password"
+                name="pass"
+                id="pass"
+                placeholder="Nhập mật khẩu WiFi">
 
-            <button type="submit">
+            <button
+                type="submit"
+                id="btnConnect">
+
                 KẾT NỐI WIFI
+
             </button>
+
         </form>
 
+        <!-- TRANG THAI -->
+
+        <div class="status-box">
+
+            <p id="status">
+                Đang kiểm tra WiFi...
+            </p>
+
+            <p id="ip">
+                IP: Đang lấy địa chỉ...
+            </p>
+
+        </div>
+
     </div>
-<script src="clock.js"></script>
+
+</div>
+
+<script src="/clock.js"></script>
 
 </body>
 </html>
