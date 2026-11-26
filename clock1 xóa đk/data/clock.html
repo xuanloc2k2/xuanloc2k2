@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+
+<link rel="stylesheet" href="clock.css">
+
+<title>Đồng hồ LED RGB</title>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>ĐỒNG HỒ LED RGB</h2>
+
+    <!-- GIAO DIEN WIFI -->
+    <div id="wifiPanel" style="display:block">
+
+        <p>CẤU HÌNH WIFI</p>
+
+        <button class="refresh" onclick="quetWiFi()">
+            QUÉT WIFI
+        </button>
+
+        <form id="wifiForm">
+
+            <select name="ssid" id="wifi" required>
+                <option value="">Đang quét WiFi...</option>
+            </select>
+
+            <input type="password"
+                   name="pass"
+                   id="pass"
+                   placeholder="Nhập mật khẩu WiFi">
+
+            <button type="submit">
+                KẾT NỐI WIFI
+            </button>
+        </form>
+
+    </div>
+<script src="clock.js"></script>
+
+</body>
+</html>
