@@ -1,0 +1,304 @@
+
+/* =====================================
+   GIAO DIEN CHUNG
+===================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #101827;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+    padding: 15px;
+    margin: 0;
+}
+
+.container {
+    max-width: 420px;
+    margin: auto;
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+h2 {
+    color: #38bdf8;
+}
+
+h3 {
+    color: #38bdf8;
+    font-size: 17px;
+}
+
+
+/* =====================================
+   WIFI
+===================================== */
+
+select,
+input,
+button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+}
+
+select,
+input {
+    background: #334155;
+    color: white;
+}
+
+button {
+    background: #0284c7;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:active {
+    opacity: 0.7;
+}
+
+.refresh {
+    background: #475569;
+}
+
+.status {
+    color: #38bdf8;
+    margin-top: 15px;
+    overflow-wrap: anywhere;
+}
+
+
+/* =====================================
+   GIAO DIEN DIEU KHIEN
+===================================== */
+
+.led-control {
+    margin-top: 20px;
+}
+
+.control-box {
+    background: #273449;
+    padding: 18px;
+    margin-top: 15px;
+    border-radius: 12px;
+}
+
+.control-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+
+/* =====================================
+   VONG TRON CHON MAU RGB
+===================================== */
+
+.color-picker {
+    width: 240px;
+    height: 240px;
+    max-width: 100%;
+    margin: 20px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #64748b;
+}
+
+#colorWheel {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+
+/* =====================================
+   GIA TRI RGB
+===================================== */
+
+.rgb-values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.rgb-item {
+    min-width: 0;
+}
+
+.rgb-item label {
+    display: block;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.rgb-item input {
+    width: 100%;
+    padding: 10px 2px;
+    margin: 0;
+    background: #101827;
+    color: white;
+    border: 1px solid #475569;
+    text-align: center;
+    font-size: 16px;
+}
+
+
+/* =====================================
+   THANH DO SANG VA SPEED
+===================================== */
+
+.control-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.control-value {
+    color: #38bdf8;
+    font-size: 20px;
+}
+
+.control-box input[type="range"] {
+    width: 100%;
+    padding: 0;
+    margin: 10px 0;
+    background: transparent;
+    accent-color: #38bdf8;
+    cursor: pointer;
+}
+
+.control-title small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* =====================================
+   TRANG THAI LED
+===================================== */
+
+#ledStatus {
+    color: #38bdf8;
+    font-size: 13px;
+    text-align: center;
+}
+
+
+/* =====================================
+   DIEN THOAI
+===================================== */
+
+@media (max-width: 400px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    .control-box {
+        padding: 14px;
+    }
+
+    .rgb-values {
+        gap: 6px;
+    }
+
+    .color-picker {
+        width: 220px;
+        height: 220px;
+    }
+}
+
+
+#colorPicker {
+    display: flex;
+    justify-content: center;
+}
+
+#preview {
+    height: 50px;
+    margin-top: 20px;
+    border-radius: 10px;
+    background: red;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: #171923;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    text-align: center;
+}
+/* =================================
+   NUT CHON CHE DO
+================================= */
+
+.mode-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.mode-buttons button {
+    flex: 1;
+    min-width: 0;
+    height: 60px;
+    padding: 13px 5px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #343b50;
+    color: white;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.mode-buttons button:hover {
+    background: #536dfe;
+    transform: translateY(-2px);
+}
+
+.mode-buttons button:active {
+    transform: scale(0.96);
+}
+
+/* MOBILE */
+
+@media (max-width: 400px) {
+
+    .mode-buttons {
+        gap: 6px;
+    }
+
+    .mode-buttons button {
+        font-size: 11px;
+        padding: 12px 3px;
+    }
+
+}

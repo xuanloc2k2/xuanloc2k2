@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+
+<link rel="stylesheet" href="clock.css">
+
+<title>Đồng hồ LED RGB</title>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>ĐỒNG HỒ LED RGB</h2>
+
+    <!-- GIAO DIEN WIFI -->
+    <div id="wifiPanel" style="display:block">
+
+        <p>CẤU HÌNH WIFI</p>
+
+        <button class="refresh" onclick="quetWiFi()">
+            QUÉT WIFI
+        </button>
+
+        <form id="wifiForm">
+
+            <select name="ssid" id="wifi" required>
+                <option value="">Đang quét WiFi...</option>
+            </select>
+
+            <input type="password"
+                   name="pass"
+                   id="pass"
+                   placeholder="Nhập mật khẩu WiFi">
+
+            <button type="submit">
+                KẾT NỐI WIFI
+            </button>
+
+        </form>
+
+        <div class="status" id="status">
+            Chọn mạng WiFi của bạn
+        </div>
+
+    </div>
+
+
+    <!-- GIAO DIEN DIEU KHIEN -->
+    <div id="controlPanel" style="display:block">
+
+        <div class="status">
+
+            <span>STATUS</span>
+
+            <p id="ip">ip ...</p>
+
+        </div>
+
+
+        <!-- COLOR PICKER -->
+        <div id="colorPicker"></div>
+
+        <div id="preview"></div>
+
+        <input id="hex" readonly value="#FF0000">
+
+
+        <div class="led-control">
+
+
+            <!-- CHON MAU RGB -->
+            <div class="control-box">
+
+                <h3>CHỌN MÀU RGB</h3>
+
+                <div class="rgb-values">
+
+                    <div class="rgb-item">
+
+                        <label>RED</label>
+
+                        <input type="number"
+                               id="red"
+                               min="0"
+                               max="255"
+                               value="255">
+
+                    </div>
+
+
+                    <div class="rgb-item">
+
+                        <label>GREEN</label>
+
+                        <input type="number"
+                               id="green"
+                               min="0"
+                               max="255"
+                               value="0">
+
+                    </div>
+
+
+                    <div class="rgb-item">
+
+                        <label>BLUE</label>
+
+                        <input type="number"
+                               id="blue"
+                               min="0"
+                               max="255"
+                               value="0">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CHON CHE DO LED -->
+            <div class="mode-buttons">
+
+                <button type="button" onclick="cheDoGradient()">
+                    GRADIENT (0)
+                </button>
+
+                <button type="button" onclick="cheDoRGB()">
+                    RGB (1)
+                </button>
+
+                <button type="button" onclick="cheDoIP()">
+                    HIỂN THỊ IP (100)
+                </button>
+
+            </div>
+
+
+            <!-- DO SANG -->
+            <div class="control-box">
+
+                <div class="control-title">
+
+                    <span>ĐỘ SÁNG</span>
+
+                    <span class="control-value" id="brightnessValue">
+                        100
+                    </span>
+
+                </div>
+
+                <input type="range"
+                       id="brightness"
+                       min="0"
+                       max="255"
+                       value="100">
+
+                <div class="control-title">
+
+                    <small>0%</small>
+
+                    <small>100%</small>
+
+                </div>
+
+            </div>
+
+
+            <!-- SPEED -->
+            <div class="control-box">
+
+                <div class="control-title">
+
+                    <span>SPEED - TỐC ĐỘ</span>
+
+                    <span class="control-value" id="speedValue">
+                        25
+                    </span>
+
+                </div>
+
+                <input type="range"
+                       id="speed"
+                       min="1"
+                       max="100"
+                       value="25">
+
+                <div class="control-title">
+
+                    <small>0%</small>
+
+                    <small>100%</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="clock.js"></script>
+
+</body>
+</html>
