@@ -1,6 +1,23 @@
 
 let dangQuet = false;
 let dangKiemTraTrangThai = false;
+let dangGuiKetNoi = false;
+
+let timerTrangThai = null;
+
+// ======================================
+// HAM HIEN THI TRANG THAI
+// ======================================
+
+function hienThiTrangThai(noiDung) {
+
+    const status = document.getElementById("status");
+
+    if (status) {
+        status.innerText = noiDung;
+    }
+}
+
 
 // ======================================
 // QUET WIFI
@@ -8,17 +25,19 @@ let dangKiemTraTrangThai = false;
 
 async function quetWiFi() {
 
-    if (dangQuet) return;
+    if (dangQuet || dangGuiKetNoi) return;
 
     dangQuet = true;
 
     const select = document.getElementById("wifi");
-    const status = document.getElementById("status");
+    const btnScan = document.getElementById("btnScan");
+
+    btnScan.disabled = true;
 
     select.innerHTML =
         '<option value="">Đang quét WiFi...</option>';
 
-    status.innerText = "Đang tìm mạng WiFi...";
+    hienThiTrangThai("Đang tìm mạng WiFi...");
 
     try {
 
@@ -29,7 +48,9 @@ async function quetWiFi() {
 
             const response = await fetch(
                 "/scan?t=" + Date.now(),
-                { cache: "no-store" }
+                {
+                    cache: "no-store"
+                }
             );
 
             if (!response.ok) {
@@ -39,7 +60,9 @@ async function quetWiFi() {
             data = await response.json();
 
             if (data.done) {
+
                 hoanTat = true;
+
                 break;
             }
 
@@ -74,20 +97,25 @@ async function quetWiFi() {
 
         });
 
-        status.innerText = networks.length
-            ? "Tìm thấy " + networks.length + " mạng WiFi"
-            : "Không tìm thấy WiFi";
+        hienThiTrangThai(
+            networks.length
+                ? "Tìm thấy " + networks.length + " mạng WiFi"
+                : "Không tìm thấy WiFi"
+        );
 
     }
     catch (error) {
 
-        status.innerText =
-            "Lỗi quét WiFi: " + error.message;
+        hienThiTrangThai(
+            "Lỗi quét WiFi: " + error.message
+        );
 
     }
     finally {
 
         dangQuet = false;
+
+        btnScan.disabled = false;
 
     }
 }
@@ -107,10 +135,14 @@ async function kiemTraTrangThai() {
 
         const response = await fetch(
             "/status?t=" + Date.now(),
-            { cache: "no-store" }
+            {
+                cache: "no-store"
+            }
         );
 
-        if (!response.ok) return;
+        if (!response.ok) {
+            throw new Error("Không nhận được phản hồi");
+        }
 
         const data = await response.json();
 
@@ -118,21 +150,20 @@ async function kiemTraTrangThai() {
         const ipElement = document.getElementById("ip");
 
         if (status) {
-
             status.innerText = data.status;
-
         }
 
         if (ipElement) {
-
             ipElement.innerText = "IP: " + data.ip;
-
         }
 
     }
     catch (error) {
 
-        console.log("Lỗi kiểm tra WiFi:", error);
+        console.log(
+            "Lỗi kiểm tra WiFi:",
+            error
+        );
 
     }
     finally {
@@ -152,24 +183,26 @@ document.getElementById("wifiForm")
 
     e.preventDefault();
 
+    if (dangGuiKetNoi) return;
+
     const ssid = document.getElementById("wifi").value.trim();
+
     const pass = document.getElementById("pass").value;
 
-    const status = document.getElementById("status");
-
-    const btn = this.querySelector('[type="submit"]');
+    const btn = document.getElementById("btnConnect");
 
     if (!ssid) {
 
-        status.innerText = "Vui lòng chọn WiFi!";
+        hienThiTrangThai("Vui lòng chọn WiFi!");
 
         return;
     }
 
-    // Khoa nut ket noi
+    dangGuiKetNoi = true;
+
     btn.disabled = true;
 
-    status.innerText = "Đang gửi thông tin WiFi...";
+    hienThiTrangThai("Đang gửi thông tin WiFi...");
 
     try {
 
@@ -193,7 +226,11 @@ document.getElementById("wifiForm")
 
         if (!response.ok) {
 
-            throw new Error("HTTP " + response.status);
+            const errorData = await response.json();
+
+            throw new Error(
+                errorData.message || "HTTP " + response.status
+            );
 
         }
 
@@ -207,20 +244,21 @@ document.getElementById("wifiForm")
 
         }
 
-        status.innerText =
-            "Đã gửi thông tin. Đang kết nối WiFi...";
+        hienThiTrangThai(
+            "Đã gửi thông tin. Đang kết nối WiFi..."
+        );
 
-        // Bat dau kiem tra trang thai
+        // Kiem tra lai trang thai sau 1 giay
         setTimeout(kiemTraTrangThai, 1000);
 
     }
     catch (error) {
 
-        status.innerText =
-            "Lỗi kết nối: " + error.message;
+        hienThiTrangThai(
+            "Lỗi kết nối: " + error.message
+        );
 
-    }
-    finally {
+        dangGuiKetNoi = false;
 
         btn.disabled = false;
 
@@ -238,10 +276,13 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Kiem tra WiFi hien tai
     await kiemTraTrangThai();
 
-    // Tu dong quet WiFi
+    // Tu dong quet WiFi neu chua ket noi
     quetWiFi();
 
     // Kiem tra trang thai moi 2 giay
-    setInterval(kiemTraTrangThai, 2000);
+    timerTrangThai = setInterval(
+        kiemTraTrangThai,
+        2000
+    );
 
 });
